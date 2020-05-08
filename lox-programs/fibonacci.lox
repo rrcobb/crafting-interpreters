@@ -1,0 +1,112 @@
+fun fib(n) {
+  if (n < 2) {
+    return n;
+  } else {
+    return fib(n-1) + fib(n-2);
+  }
+}
+
+// currently, very poorly balanced
+class Node {
+  init(key, value) {
+    this.key = key;
+    this.value = value;
+    this.left = nil;
+    this.right = nil;
+  }
+
+  add(key, value) {
+    if (key < this.key) {
+      // add left 
+      if (this.left) {
+        this.left.add(key, value);
+      } else {
+        this.left = Node(key, value);
+      }
+    } else {
+      // add right
+      if (this.right) {
+        this.right.add(key, value);
+      } else {
+        this.right = Node(key, value);
+      }
+    }
+  }
+
+  get(key) {
+    if (this.key == key) {
+      return this.value;
+    } else {
+      if (key < this.key and this.left) {
+        return this.left.get(key);
+      } else {
+        if (this.right) {
+          return this.right.get(key);
+        }
+      }
+    }
+  }
+}
+
+class Results {
+  init() {
+    this.root = nil;
+  }
+
+  store(key, value) {
+    if (this.root == nil) {
+      this.root = Node(key, value);
+    } else {
+      this.root.add(key, value);   
+    }
+  }
+
+  get(key) {
+    if (this.root) {
+      return this.root.get(key);
+    }
+  }
+}
+
+// umm, so we have to build a dictionary data structure for this to work
+// so, I guess let's do that
+fun memoize(f) {
+  var results = Results();
+  fun memoized(arg) {
+    var stored = results.get(arg);
+    if (stored) {
+      return stored;
+    } else {
+      var calculated = f(arg);   
+      results.store(arg, calculated);
+      return calculated;
+    }
+  }
+  return memoized;
+}
+
+var memoized_fib = memoize(fib);
+var num = 30;
+
+fun test_unmemoized() {
+  print "unmemoized, fib of";
+  print num;
+  print fib(num);
+}
+
+fun test_memoized() {
+  print "memoized, fib of";
+  print num;
+  print memoized_fib(num);
+}
+
+fun time(f) {
+  var start = clock();
+  f();
+  var end = clock();
+  print "calling function took ";
+  print (end - start);
+}
+
+time(test_unmemoized);
+time(test_memoized);
