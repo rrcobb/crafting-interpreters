@@ -107,9 +107,13 @@ Is nil falsy? yes.
 
 ### Scanning
 
+DONE: Java implementation, challenge questions, check the answers
+TODO: Rust implementation
+
 1. The lexical grammars of Python and Haskell are not regular. What does that mean, and why aren’t they?
 
 - context sensitive, due to significant indentation (for both)
+- python adds indent and dedent pseudo-tokens
 
 important alternatives being type 0 (no rules!), context-free but not regular, or context-sensitive
 
@@ -117,6 +121,15 @@ important alternatives being type 0 (no rules!), context-free but not regular, o
 2. Aside from separating tokens — distinguishing print foo from printfoo — spaces aren’t used for much in most languages. However, in a couple of dark corners, a space does affect how code is parsed in CoffeeScript, Ruby, and the C preprocessor. Where and what effect does it have in each of those languages?
 
 not sure for coffeescript or c preprocessor
+
+- coffescript has ruby-like ambiguity around function calls, which spaces disambiguate
+- C preprocessor has an ambiguity between function macros and regular text macros that start with an open paren:
+
+```
+#define MACRO1 (p) (p)
+#define MACRO2(p) (p)
+```
+the second is a function macro, so the spaces are significant!
 
 spaces affecting parsing in Ruby... 
 - tuples vs. function calls
@@ -133,3 +146,7 @@ Keeping comments is key if
 
 - newlines seem like they're handled
 - nesting levels weren't that hard, but maybe my implementation is fragile? idk, I just count up when hit more and count down when we end
+
+answer:
+- could be made cleaner by starting the nesting level at 1 instead of 0
+- because it stores the level of nesting, it makes the language no longer _regular_
