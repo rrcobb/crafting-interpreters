@@ -1,11 +1,11 @@
-package com.craftinginterpreters.lox;
+package jlox;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.craftinginterpreters.lox.TokenType.*;
+import static jlox.TokenType.*;
 
 class Scanner {
   private final String source;
@@ -73,6 +73,17 @@ class Scanner {
       case '/':
         if(match('/')) {
           while (peek() != '\n' && !isAtEnd()) advance();
+        } else if(match('*')) {
+          int nestingLevel = 0;
+          // multiline comments
+          while((!(peek() == '*' && peekNext() == '/') || nestingLevel > 0) && !isAtEnd()) {
+            if (peek() == '\n') line++;
+            if (peek() == '/' && peekNext() == '*') nestingLevel++;
+            if (peek() == '*' && peekNext() == '/') nestingLevel--;
+            advance();
+          }
+          // final star and slash
+          if (!isAtEnd()) { advance(); advance(); }
         } else {
           addToken(SLASH);
         }

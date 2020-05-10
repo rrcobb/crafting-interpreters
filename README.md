@@ -34,6 +34,11 @@ Missed: CSS
 
 `java -cp jlox-java/* hello`
 
+Compiling and running jlox:
+
+`javac jlox/*.java`
+`java -cp ./ jlox.Lox`
+
 3. Do the same thing for C. To get some practice with pointers, define a doubly-linked list of heap-allocated strings. Write functions to insert, find, and delete items from it. Test them.
 
 `clox-c/hello.c`
@@ -104,9 +109,18 @@ Is nil falsy? yes.
 
 1. The lexical grammars of Python and Haskell are not regular. What does that mean, and why aren’t they?
 
+- context sensitive, due to significant indentation (for both)
+
+important alternatives being type 0 (no rules!), context-free but not regular, or context-sensitive
+
 
 2. Aside from separating tokens — distinguishing print foo from printfoo — spaces aren’t used for much in most languages. However, in a couple of dark corners, a space does affect how code is parsed in CoffeeScript, Ruby, and the C preprocessor. Where and what effect does it have in each of those languages?
 
+not sure for coffeescript or c preprocessor
+
+spaces affecting parsing in Ruby... 
+- tuples vs. function calls
+- more places?
 
 3. Our scanner here, like most, discards comments and whitespace since those aren’t needed by the parser. Why might you want to write a scanner that does not discard those? What would it be useful for?
 
@@ -116,3 +130,6 @@ Keeping comments is key if
 - e.g. syntax highlighting, formatting, transpiling...
 
 4. Add support to Lox’s scanner for C-style /* ... */ block comments. Make sure to handle newlines in them. Consider allowing them to nest. Is adding support for nesting more work than you expected? Why?
+
+- newlines seem like they're handled
+- nesting levels weren't that hard, but maybe my implementation is fragile? idk, I just count up when hit more and count down when we end
