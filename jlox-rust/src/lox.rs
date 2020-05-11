@@ -1,18 +1,43 @@
-// notes: 
-//  - um, so, Rust doesn't have classes
-//  - so, the translation from Java will not be 1:1
-//  but, w/e, so far this Java project is mostly namespaced functions anyways
-//
-//  hokay, so: we'll use Rust modules and structs to stand in for Java Classes
-//  and I have to figure out again how the import system works in rust
+use std::fs;
+use std::io;
+use std::io::prelude::*;
+use crate::scanner::*;
 
 // Lox.runPrompt: jlox/Lox.java L30
 pub fn run_prompt() {
-    println!("run from the prompt > ")
+    let stdin = io::stdin();
+    print!("> ");
+    io::stdout().flush().unwrap();
+    for line in stdin.lock().lines() {
+        run(line.unwrap());
+        print!("> ");
+        io::stdout().flush().unwrap();
+    }
 }
 
 // Lox.runFile: jlox/Lox.java L24
 pub fn run_file(path: &str) {
-    println!("run a file {}", path);
+    let contents = fs::read_to_string(path)
+        .expect(&format!("an error while reading {}", path));
+    run(contents);
+}
+
+// Lox.run: jlox/Lox.java L42
+fn run(source: String) {
+    let scanner = Scanner::new(source);
+    let tokens = scanner.scan_tokens();
+    for token in tokens.iter() {
+      println!("{}", token);
+    }
+}
+
+// Lox.error: jlox/Lox.java L51
+fn error(line: u8, message: String) {
+    report(line, "".to_string(), message);
+}
+
+// Lox.report jlox/Lox.java L51
+fn report(line: u8, location: String, message: String) {
+    eprintln!("[line {} ] Error {}: {}", line, location, message);    
 }
 
