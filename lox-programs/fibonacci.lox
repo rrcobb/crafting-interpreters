@@ -6,6 +6,8 @@ fun fib(n) {
   }
 }
 
+/* multiline comment, just slashes and stars */
+
 // currently, very poorly balanced
 class Node {
   init(key, value) {

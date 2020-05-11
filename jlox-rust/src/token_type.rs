@@ -12,7 +12,9 @@ pub enum TokenType {
   Less, LessEqual,
 
   // Literals.
-  Identifier, STRING, Number,
+  Identifier,
+  STRING { literal: String },
+  Number { literal: f64 },
 
   // Keywords.
   And, Class, Else, False, Fun, For, If, Nil, Or,

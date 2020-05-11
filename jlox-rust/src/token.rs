@@ -7,10 +7,9 @@ use crate::token_type::*;
 #[derive(Debug, Clone)]
 pub struct Token {
     // 'type' in Java (reserved keyword in Rust)
-    type_: TokenType,
-    lexeme: String,
-    // literal: ???, needs to be generic?
-    line: u8,
+    pub type_: TokenType,
+    pub lexeme: String,
+    pub line: usize,
 }
 
 // Token.toString in jlox/Token.java L16

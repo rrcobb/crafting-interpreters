@@ -24,7 +24,7 @@ pub fn run_file(path: &str) {
 
 // Lox.run: jlox/Lox.java L42
 fn run(source: String) {
-    let scanner = Scanner::new(source);
+    let mut scanner = Scanner::new(source);
     let tokens = scanner.scan_tokens();
     for token in tokens.iter() {
       println!("{}", token);
@@ -32,12 +32,12 @@ fn run(source: String) {
 }
 
 // Lox.error: jlox/Lox.java L51
-fn error(line: u8, message: String) {
+pub fn error(line: usize, message: String) {
     report(line, "".to_string(), message);
 }
 
 // Lox.report jlox/Lox.java L51
-fn report(line: u8, location: String, message: String) {
+fn report(line: usize, location: String, message: String) {
     eprintln!("[line {} ] Error {}: {}", line, location, message);    
 }
 
