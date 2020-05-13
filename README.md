@@ -58,7 +58,12 @@ Compiling and running jlox:
 1. Pick an open source implementation of a language you like. Download the source code and poke around in it. Try to find the code that implements the scanner and parser. Are they hand-written, or generated using tools like Lex and Yacc? (.l or .y files usually imply the latter.)
 
 python
+rust:
+- low level lexer: https://github.com/rust-lang/rust/blob/master/src/librustc_lexer/src/lib.rs
+- higher level lexer: https://github.com/rust-lang/rust/blob/master/src/librustc_parse/lexer/mod.rs
+Notes: these are hand-written 
 
+High level description of how the rust compiler works: https://rustc-dev-guide.rust-lang.org/overview.html
 
 2. Just-in-time compilation tends to be the fastest way to implement a dynamically-typed language, but not all of them use it. What reasons are there to not JIT?
 
@@ -107,8 +112,7 @@ Is nil falsy? yes.
 
 ### Scanning
 
-DONE: Java implementation, challenge questions, check the answers
-TODO: Rust implementation
+DONE: Java implementation, challenge questions, check the answers, Rust implementation
 
 1. The lexical grammars of Python and Haskell are not regular. What does that mean, and why aren’t they?
 
@@ -150,3 +154,9 @@ Keeping comments is key if
 answer:
 - could be made cleaner by starting the nesting level at 1 instead of 0
 - because it stores the level of nesting, it makes the language no longer _regular_
+
+### Representing Code
+
+we're generating some Java code, as strings, using Java... fun!
+
+see jlox-java/tool/GenerateAst.java
