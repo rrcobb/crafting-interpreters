@@ -160,3 +160,112 @@ answer:
 we're generating some Java code, as strings, using Java... fun!
 
 see jlox-java/tool/GenerateAst.java
+
+1. Earlier, I said that the |, *, and + forms we added to our grammar metasyntax were just syntactic sugar. Given this grammar:
+
+expr → expr ( "(" ( expr ( "," expr )* )? ")" | "." IDENTIFIER )*
+     | IDENTIFIER
+     | NUMBER
+
+Produce a grammar that matches the same language but does not use any of that notational sugar.
+
+expr → expr x
+expr → IDENTIFIER
+expr → NUMBER
+
+x → x x
+x → tuple
+x → "." IDENTIFIER
+
+tuple → "()"
+tuple → "(" elist ")"
+
+elist → expr
+elist → expr "," elist
+
+Bonus: What kind of expression does this bit of grammar encode?
+
+number literals, object property access, and function calls, including args that are also function calls, and also trailing etcs on them. somewhat unfortunate that both numbers and identifiers can appear in the expression box, since it's weird to see arg.7.8.9.10
+
+ident
+5
+ident.ident.ident()
+5.ident
+5()
+5()()
+5(arg, arg, 5.6.8)
+
+
+2. The Visitor pattern lets you emulate the functional style in an object-oriented language. Devise a corresponding pattern in a functional language. It should let you bundle all of the operations on one type together and let you define new types easily.
+
+(SML or Haskell would be ideal for this exercise, but Scheme or another Lisp works as well.)
+
+visitor pattern: 
+abstract class, with subclasses
+  want to make a new kind of thing-that-deals-with-subclasses, but not stick the behavior in the subclasses themselves
+  because it, seemingly, belongs in it's own class (makes sense!)
+So, you make a function 'accept' in the abstract class
+  and override it in the subclasses
+  each subclass calling a method like 'visitMySubClass' in their version of 'accept'
+  as a way of dispatching the 'right' version of the method when you write it in your implementing class
+  then the implementing class implements the 'visitSubClass' methods to deal with each kind of subclass
+  and a 'dispatcher' method that calls the 'accept' method of the abstract class, (and has a type signature that accepts the abstract class)
+
+note: imo, this looks a lot like 'dependency inversion', to my naive eyes
+
+So, in a functional world, what does the corresponding pattern look like?
+
+> It should let you bundle all of the operations on one type together and let you define new types easily.
+
+So... like making classes in Lisp?
+
+I... don't know if I understand what the code would do
+or what problem it would solve...
+Let's take a stab anyhow.
+
+un-dependency-inverter?
+operate-on-data
+
+or is this just trying to illustrate that this isn't a problem in Lisps? idk, I'm not sure I quite get it
+
+<T> -> computed
+
+make something into a T?
+interfaces?
+
+feels very much like a guessing the password issue. Maybe it would make sense if I were writing it in Scheme or Haskell?
+
+Answer:
+> One way is to create a record or tuple containing a function pointer for each operation. In order to allow defining new types and passing them to existing code, these functions need to encapsulate the type entirely -- the existing code isn't aware of it, so it can't type check. You can do that by having the functions be closures that all close over the same shared object, "this", basically.
+
+I... don't know if I can visualize what such code would look like tbh
+
+3. In Reverse Polish Notation (RPN), the operands to an arithmetic operator are both placed before the operator, so 1 + 2 becomes 1 2 +. Evaluation proceeds from left to right. Numbers are pushed onto an implicit stack. An arithmetic operator pops the top two numbers, performs the operation, and pushes the result. Thus, this:
+
+(1 + 2) * (4 - 3)
+
+in RPN becomes:
+
+1 2 + 4 3 - *
+
+Define a visitor class for our syntax tree classes that takes an expression, converts it to RPN, and returns the resulting string.
+
+jlox/RpnPrinter.java
+
+
+// TODO: translate ch. 5 into rust
+
+### Parsing Expressions
+
+jlox/Parser.java
+
+// TODO: translate ch. 6 into rust
+
+1. In C, a block is a statement form that allows you to pack a series of statements where a single one is expected. The comma operator is an analogous syntax for expressions. A comma-separated series of expressions can be given where a single expression is expected (except inside a function call’s argument list). At runtime, the comma operator evaluates the left operand and discards the result. Then it evaluates and returns the right operand.
+
+Add support for comma expressions. Give them the same precedence and associativity as in C. Write the grammar, and then implement the necessary parsing code.
+
+2. Likewise, add support for the C-style conditional or “ternary” operator ?:. What precedence level is allowed between the ? and :? Is the whole operator left-associative or right-associative?
+
+3. Add error productions to handle each binary operator appearing without a left-hand operand. In other words, detect a binary operator appearing at the beginning of an expression. Report that as an error, but also parse and discard a right-hand operand with the appropriate precedence.
+
