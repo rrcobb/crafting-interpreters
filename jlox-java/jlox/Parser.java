@@ -8,7 +8,8 @@ import static jlox.TokenType.*;
  * Implementation of the parsing for the following grammar:
 
 
-expression     → equality ;
+expression     → ternary ( "," expression )* ;
+ternary        → equality ( "?" expression ":" expression )? ;
 equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 comparison     → addition ( ( ">" | ">=" | "<" | "<=" ) addition )* ;
 addition       → multiplication ( ( "-" | "+" ) multiplication )* ;
@@ -39,9 +40,32 @@ class Parser {
     }
   }
 
-  // expression     → equality ;
+
+  // expression     → ternary ( "," expression )* ;
   private Expr expression() {
-    return equality();
+    Expr expr = equality();
+
+    while(match(COMMA)) {
+      Token operator = previous();
+      Expr right = comparison();
+      expr = new Expr.Binary(expr, operator, right);
+    }
+
+    return expr;
+  }
+
+  // ternary        → equality ( "?" equality ":" equality )? ;
+  private Expr ternary() {
+    Expr expr = equality();
+
+    if (match(QUESTION)) {
+      Expr second = equality();
+      consume(COLON, "Expect ':' after expression.");
+      Expr third = equality();
+      expr = new Expr.Ternary(expr, second, third);
+    }
+
+    return expr;
   }
 
   // equality       → comparison ( ( "!=" | "==" ) comparison )* ;
