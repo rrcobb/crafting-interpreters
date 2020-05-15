@@ -150,6 +150,16 @@ class Parser {
       return new Expr.Grouping(expr);
     }
 
+
+    // check all the binary operators
+    // this should be done in a fall-through manner, only matching the lower-associativity productions (not just an expression)
+    if (match(SLASH, STAR, MINUS, PLUS, BANG_EQUAL, EQUAL_EQUAL, GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
+      Token operator = previous();
+      // now we want to consume an operand
+      Expr toDiscard = expression();
+      throw error(operator, "Missing left hand operand.");
+    }
+
     throw error(peek(), "Expect expression.");
   }
 
