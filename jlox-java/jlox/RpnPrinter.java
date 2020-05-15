@@ -1,21 +1,15 @@
 package jlox;
 
+import java.util.List;
+
 // prints a reverse polish notation string representation of AST nodes
 class RpnPrinter implements Expr.Visitor<String> {
   public static void main(String[] args) {
-    Expr expression = new Expr.Binary(
-        new Expr.Grouping(
-          new Expr.Binary(
-            new Expr.Literal(1),
-            new Token(TokenType.PLUS, "+", null, 1),
-            new Expr.Literal(2))),
-        new Token(TokenType.STAR, "*", null, 1),
-        new Expr.Grouping(
-          new Expr.Binary(
-            new Expr.Literal(4),
-            new Token(TokenType.MINUS, "-", null, 1),
-            new Expr.Literal(3)
-            )));
+    String source = "1 + ((0+1, 6*7) ? 2 : 3 + 8) + 4";
+    Scanner scanner = new Scanner(source);
+    List<Token> tokens = scanner.scanTokens();
+    Parser parser = new Parser(tokens);
+    Expr expression = parser.parse();
 
     System.out.println(new RpnPrinter().print(expression));
   }
@@ -30,6 +24,17 @@ class RpnPrinter implements Expr.Visitor<String> {
     return expr.left.accept(this) + " " 
       + expr.right.accept(this) + " "
       + expr.operator.lexeme; 
+  }
+
+  @Override
+  public String visitTernaryExpr(Expr.Ternary expr) {
+    // ternary 
+    // https://stackoverflow.com/a/16930865/3574917
+    // first second third : ?
+    return expr.first.accept(this) + " "
+      + expr.second.accept(this) + " "
+      + expr.third.accept(this) + " "
+      +  ": ? ";
   }
 
   @Override

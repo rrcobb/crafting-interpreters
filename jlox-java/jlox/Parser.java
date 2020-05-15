@@ -41,13 +41,13 @@ class Parser {
   }
 
 
-  // expression     → ternary ( "," expression )* ;
+  // expression     → ternary ( "," ternary )* ;
   private Expr expression() {
-    Expr expr = equality();
+    Expr expr = ternary();
 
     while(match(COMMA)) {
       Token operator = previous();
-      Expr right = comparison();
+      Expr right = expression();
       expr = new Expr.Binary(expr, operator, right);
     }
 
