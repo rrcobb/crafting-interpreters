@@ -3,7 +3,12 @@ name = "jlox-rust"
 version = "0.1.0"
 authors = ["Robert Cobb <rwcobbjr@gmail.com>"]
 edition = "2018"
+default-run = "jlox-rust"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "ast-printer"
+path = "src/ast_printer.rs"
 
 [dependencies]
