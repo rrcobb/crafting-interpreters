@@ -25,52 +25,38 @@ fn main() {
     };
     let expression = Binary { left: &left, operator, right: &right };
 
-    println!("{}", expression.print());
+    println!("{}", expression.accept(&AstPrinter {}));
 }
 
-pub trait AstPrintable: Expr {
-    fn print(&self) -> String;
+pub fn print(expr: impl Expr) -> String {
+    let printer = AstPrinter {};
+    expr.accept(&printer)
 }
 
-pub fn print<T: AstPrintable>(expr: T) -> String {
-    expr.print()
-}
+pub struct AstPrinter;
 
-impl AstPrintable for Binary<'_> {
-    fn print(&self) -> String {
-	parenthesize(&self.operator.lexeme, vec![self.left, self.right])
+impl Visitor for AstPrinter {
+    fn visit_binary(&self, expr: &Binary) -> String {
+	parenthesize(&expr.operator.lexeme, vec![expr.left, expr.right], self)
+    }
+
+    fn visit_grouping(&self, expr: &Grouping) -> String {
+	parenthesize("group", vec![expr.expression], self)
+    }
+
+    fn visit_literal(&self, expr: &Literal) -> String {
+	(expr.value).to_string()
+    }
+    fn visit_unary(&self, expr: &Unary) -> String {
+	parenthesize(&expr.operator.lexeme, vec![expr.right], self)
     }
 }
 
-impl AstPrintable for Ternary<'_> {
-    fn print(&self) -> String {
-	parenthesize("ternary", vec![self.first, self.second, self.third])
-    }
-}
-
-impl AstPrintable for Grouping<'_> {
-    fn print(&self) -> String {
-	parenthesize("group", vec![self.expression])
-    }
-}
-
-impl AstPrintable for Literal {
-    fn print(&self) -> String {
-	(&self.value).to_string()
-    }
-}
-
-impl AstPrintable for Unary<'_> {
-    fn print(&self) -> String {
-	parenthesize(&self.operator.lexeme, vec![self.right])
-    }
-}
-
-fn parenthesize(name: &str, exprs: Vec<&dyn Expr>) -> String {
+fn parenthesize(name: &str, exprs: Vec<&dyn Expr>, printer: &AstPrinter) -> String {
     let mut s = String::from(format!("({}", name));
     for expr in exprs.iter() {
 	s.push(' ');
-	s.push_str(&format!("{:?}", expr));
+	s.push_str(&expr.accept(printer));
     }
     s.push(')');
     s
