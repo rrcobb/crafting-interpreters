@@ -7,21 +7,23 @@ use std::io::LineWriter;
 
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
-    match args.len() {
-        2 => define_ast(&args[1], "Expr", vec![
-          "Binary   - left: <T: Expr>, operator: Token, right: <S: Expr>",
-          "Ternary  - first: <T: Expr>, second: <U: Expr>, third: <V: Expr>",
-          "Grouping - expression: <T: Expr>",
-          // will have to do something else for literals here
-          // maybe an enum
-          "Literal  - value: String",
-          "Unary    - operator: Token, right: <T: Expr>"
-        ]),
-        _ => {
-            println!("Usage: generate_ast <output directory>");
-            Ok(())
-        },
-    }
+//     match args.len() {
+//         2 => define_ast(&args[1], "Expr", vec![
+//           "Binary   - left: <T: Expr>, operator: Token, right: <S: Expr>",
+//           "Ternary  - first: <T: Expr>, second: <U: Expr>, third: <V: Expr>",
+//           "Grouping - expression: <T: Expr>",
+//           // will have to do something else for literals here
+//           // maybe an enum
+//           "Literal  - value: String",
+//           "Unary    - operator: Token, right: <T: Expr>"
+//         ]),
+//         _ => {
+//             println!("Usage: generate_ast <output directory>");
+//             Ok(())
+//         },
+//     }
+    println!("fix generate_ast before running.");
+    Ok(())
 }
 
 fn define_ast(output_dir: &str, base_name: &str, types: Vec<&str>) -> std::io::Result<()> {

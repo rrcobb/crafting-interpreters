@@ -271,3 +271,12 @@ Parser.java L155
 
 // TODO: translate ch. 5 into rust
 // TODO: translate ch. 6 into rust
+- tool/GenerateAst.java
+- Expr.java (which Java generates with GenerateAst.java
+- AstPrinter.java
+- RpnPrinter.java
+- Parser.java
+
+Notes:
+- jlox-java Expr subclasses implement the Visitor pattern, so that e.g. AstPrinter can implement for each type but dispatch to the correct version with a type signature that uses a Generic.
+- In Rust, we don't need to do this - all the 'subclasses' will just impl a trait, so a function can just accept a type with that trait - see https://blog.rust-lang.org/2015/05/11/traits.html
