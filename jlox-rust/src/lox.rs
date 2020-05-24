@@ -29,7 +29,9 @@ fn run(source: String) {
     let mut scanner = Scanner::new(source);
     let tokens = scanner.scan_tokens();
     let mut parser = Parser::new(tokens);
+    println!("parsing");
     let expression = parser.parse();
+    println!("parsed");
 
     println!("{}", (AstPrinter {}).print(expression));
 }

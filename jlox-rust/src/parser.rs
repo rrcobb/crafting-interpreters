@@ -95,12 +95,13 @@ impl Parser {
 	    Number { literal } => Literal { value: Lit::Number(literal) },
 	    STRING { literal } => Literal { value: Lit::Strng(literal) },
 	    LeftParen => {
+		self.advance();
 		let expr = self.expression();
 		self.consume(&RightParen, "Expect ')' after expression.");
 		Grouping { expression: Box::new(expr) }
 	    }
 	    _ => {
-		panic!()
+		panic!("failed in primary on not matching")
 	    }
 	}
     }
@@ -121,7 +122,8 @@ impl Parser {
 
     fn check(&self, token_type: &TokenType) -> bool {
 	if self.is_at_end() { return false; }
-	token_type == &self.peek().type_
+	let result = token_type == &self.peek().type_;
+	result
     }
 
     fn previous(&self) -> Token {

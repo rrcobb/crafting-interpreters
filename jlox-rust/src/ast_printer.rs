@@ -1,8 +1,8 @@
 // maps to jlox-java AstPrinter.java
-use crate::token_type::TokenType;
 use crate::token::*;
 use crate::expr::*;
 use crate::expr::Expr::*;
+use crate::token_type::TokenType;
 
 fn main() {
     let left = Unary {
@@ -34,6 +34,7 @@ impl AstPrinter {
     }
 
     fn parenthesize(&self, name: &str, exprs: Vec<&Expr>) -> String {
+	println!("parenthesizing");
 	let mut s = String::from(format!("({}", name));
 	for expr in exprs.iter() {
 	    s.push(' ');
@@ -46,6 +47,7 @@ impl AstPrinter {
 
 impl Visitor<String> for AstPrinter {
     fn visit_binary(&self, left: &Expr, operator: &Token, right: &Expr) -> String {
+	println!("printing a binary expr");
 	self.parenthesize(&operator.lexeme, vec![left, right])
     }
 
@@ -54,6 +56,7 @@ impl Visitor<String> for AstPrinter {
     }
 
     fn visit_literal(&self, val: &Lit) -> String {
+	println!("printing a literal expr");
 	match val {
 	    Lit::False => "false".to_string(),
 	    Lit::True => "true".to_string(),
@@ -62,6 +65,7 @@ impl Visitor<String> for AstPrinter {
 	    Lit::Strng(s) => s.to_string(),
 	}
     }
+
     fn visit_unary(&self, operator: &Token, right: &Expr) -> String {
 	self.parenthesize(&operator.lexeme, vec![right])
     }
