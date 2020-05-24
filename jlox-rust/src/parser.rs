@@ -88,7 +88,7 @@ impl Parser {
     }
 
     fn primary(&mut self) -> Expr {
-	match self.peek().type_ {
+	let res = match self.peek().type_ {
 	    False => Literal { value: Lit::False },
 	    True => Literal { value: Lit::True },
 	    Nil => Literal { value: Lit::Nil },
@@ -103,7 +103,9 @@ impl Parser {
 	    _ => {
 		panic!("failed in primary on not matching")
 	    }
-	}
+	};
+	self.advance();
+	res
     }
 
     fn consume(&mut self, type_: &TokenType, message: &str) {
@@ -111,8 +113,10 @@ impl Parser {
     }
 
     fn mtch(&mut self, types: Vec<TokenType>) -> bool {
+	println!("checking {:?} against {:?}", self.peek().type_, types);
 	for type_ in types.iter() {
 	    if self.check(type_) {
+		println!("and it matched");
 		self.advance();
 		return true;
 	    }
