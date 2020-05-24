@@ -2,6 +2,8 @@ use std::fs;
 use std::io;
 use std::io::prelude::*;
 use crate::scanner::*;
+use crate::parser::*;
+use crate::ast_printer::*;
 
 // Lox.runPrompt: jlox/Lox.java L30
 pub fn run_prompt() {
@@ -26,9 +28,10 @@ pub fn run_file(path: &str) {
 fn run(source: String) {
     let mut scanner = Scanner::new(source);
     let tokens = scanner.scan_tokens();
-    for token in tokens.iter() {
-      println!("{}", token);
-    }
+    let parser = Parser { tokens, current: 0 };
+    let expression = parser.parse();
+
+    println!("{}", expression.accept(&AstPrinter {}));
 }
 
 // Lox.error: jlox/Lox.java L51

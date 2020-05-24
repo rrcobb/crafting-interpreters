@@ -34,8 +34,12 @@ impl Expr for Grouping<'_> {
 	}
 }
 
-pub struct Literal {
-	pub value: String,
+pub enum Literal {
+	False(bool),
+	True(bool),
+	Nil,
+	Number(f64),
+	Strng(String)
 }
 impl Expr for Literal {
 	fn accept(&self, visitor: &dyn Visitor) -> String {

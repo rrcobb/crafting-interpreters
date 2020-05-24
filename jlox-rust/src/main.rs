@@ -3,6 +3,9 @@ mod lox;
 mod token_type;
 mod scanner;
 mod token;
+mod expr;
+mod parser;
+mod ast_printer;
 
 use crate::lox::*;
 // Lox.main: jlox/Lox.java L14

@@ -269,8 +269,6 @@ Add support for comma expressions. Give them the same precedence and associativi
 
 Parser.java L155
 
-// TODO: translate ch. 5 into rust
-// TODO: translate ch. 6 into rust
 - tool/GenerateAst.java
 - Expr.java (which Java generates with GenerateAst.java
 - AstPrinter.java
@@ -280,3 +278,11 @@ Parser.java L155
 Notes:
 - jlox-java Expr subclasses implement the Visitor pattern, so that e.g. AstPrinter can implement for each type but dispatch to the correct version with a type signature that uses a Generic.
 - In Rust, we don't need to do this - all the 'subclasses' will just impl a trait, so a function can just accept a type with that trait - see https://blog.rust-lang.org/2015/05/11/traits.html
+
+Actually, seems like my traits knowledge is too weak, so made the visitor pattern anyway. It could be because I can't quite see how to do the types right for Expr, but w/e it's working okay now.
+
+Broken: ast_generator.rs
+working, ish: expr.rs, ast_printer.rs
+
+// TODO: translate ch. 6 into rust
+// parser.rs + some changes to main / lox

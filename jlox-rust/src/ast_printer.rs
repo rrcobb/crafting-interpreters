@@ -1,7 +1,4 @@
 // maps to jlox-java AstPrinter.java
-mod expr;
-mod token_type;
-mod token;
 use crate::token_type::TokenType;
 use crate::token::*;
 use crate::expr::*;
@@ -13,7 +10,7 @@ fn main() {
 	    lexeme: "-".to_string(), 
 	    line: 1
 	},
-	right: &Literal { value: "123".to_string() },
+	right: &Literal::Number(123.0),
     };
     let operator = Token { 
 	type_: TokenType::Star,
@@ -21,7 +18,7 @@ fn main() {
 	line: 1
     };
     let right = Grouping {
-	expression: &Literal { value: "45.67".to_string() }
+	expression: &Literal::Number(45.67)
     };
     let expression = Binary { left: &left, operator, right: &right };
 
@@ -45,7 +42,14 @@ impl Visitor for AstPrinter {
     }
 
     fn visit_literal(&self, expr: &Literal) -> String {
-	(expr.value).to_string()
+	use crate::expr::Literal::*;
+	match expr {
+	    False(val) => "false".to_string(),
+	    True(val) => "true".to_string(),
+	    Nil => "nil".to_string(),
+	    Number(n) => format!("{}", n),
+	    Strng(s) => *s,
+	}
     }
     fn visit_unary(&self, expr: &Unary) -> String {
 	parenthesize(&expr.operator.lexeme, vec![expr.right], self)
