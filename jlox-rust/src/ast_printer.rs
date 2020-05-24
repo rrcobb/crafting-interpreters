@@ -2,6 +2,7 @@
 use crate::token_type::TokenType;
 use crate::token::*;
 use crate::expr::*;
+use crate::expr::Expr::*;
 
 fn main() {
     let left = Unary {
@@ -10,7 +11,7 @@ fn main() {
 	    lexeme: "-".to_string(), 
 	    line: 1
 	},
-	right: &Literal::Number(123.0),
+	right: Box::new(Literal { value: Lit::Number(123.0) })
     };
     let operator = Token { 
 	type_: TokenType::Star,
@@ -18,50 +19,50 @@ fn main() {
 	line: 1
     };
     let right = Grouping {
-	expression: &Literal::Number(45.67)
+	expression: Box::new(Literal { value: Lit::Number(45.67) })
     };
-    let expression = Binary { left: &left, operator, right: &right };
+    let expression = Binary { left: Box::new(left), operator, right: Box::new(right) };
 
-    println!("{}", expression.accept(&AstPrinter {}));
-}
-
-pub fn print(expr: impl Expr) -> String {
-    let printer = AstPrinter {};
-    expr.accept(&printer)
+    println!("{}", (AstPrinter {}).print(expression));
 }
 
 pub struct AstPrinter;
 
-impl Visitor for AstPrinter {
-    fn visit_binary(&self, expr: &Binary) -> String {
-	parenthesize(&expr.operator.lexeme, vec![expr.left, expr.right], self)
+impl AstPrinter {
+    pub fn print(&self, expr: Expr) -> String {
+	expr.accept(self)
     }
 
-    fn visit_grouping(&self, expr: &Grouping) -> String {
-	parenthesize("group", vec![expr.expression], self)
-    }
-
-    fn visit_literal(&self, expr: &Literal) -> String {
-	use crate::expr::Literal::*;
-	match expr {
-	    False(val) => "false".to_string(),
-	    True(val) => "true".to_string(),
-	    Nil => "nil".to_string(),
-	    Number(n) => format!("{}", n),
-	    Strng(s) => *s,
+    fn parenthesize(&self, name: &str, exprs: Vec<&Expr>) -> String {
+	let mut s = String::from(format!("({}", name));
+	for expr in exprs.iter() {
+	    s.push(' ');
+	    s.push_str(&expr.accept(self));
 	}
-    }
-    fn visit_unary(&self, expr: &Unary) -> String {
-	parenthesize(&expr.operator.lexeme, vec![expr.right], self)
+	s.push(')');
+	s
     }
 }
 
-fn parenthesize(name: &str, exprs: Vec<&dyn Expr>, printer: &AstPrinter) -> String {
-    let mut s = String::from(format!("({}", name));
-    for expr in exprs.iter() {
-	s.push(' ');
-	s.push_str(&expr.accept(printer));
+impl Visitor<String> for AstPrinter {
+    fn visit_binary(&self, left: &Expr, operator: &Token, right: &Expr) -> String {
+	self.parenthesize(&operator.lexeme, vec![left, right])
     }
-    s.push(')');
-    s
+
+    fn visit_grouping(&self, expression: &Expr) -> String {
+	self.parenthesize("group", vec![expression])
+    }
+
+    fn visit_literal(&self, val: &Lit) -> String {
+	match val {
+	    Lit::False => "false".to_string(),
+	    Lit::True => "true".to_string(),
+	    Lit::Nil => "nil".to_string(),
+	    Lit::Number(n) => format!("{}", n),
+	    Lit::Strng(s) => s.to_string(),
+	}
+    }
+    fn visit_unary(&self, operator: &Token, right: &Expr) -> String {
+	self.parenthesize(&operator.lexeme, vec![right])
+    }
 }

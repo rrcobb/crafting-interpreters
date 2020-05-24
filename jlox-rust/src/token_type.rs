@@ -1,6 +1,6 @@
 // maps to jlox-java file jlox/TokenType.java
 #[allow(dead_code)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum TokenType {
   // Single Character Tokens
   LeftParen, RightParen, LeftBrace, RightBrace,

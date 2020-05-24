@@ -1,110 +1,117 @@
 use crate::expr::*;
+use crate::expr::Expr::*;
 use crate::token_type::TokenType;
 use crate::token_type::TokenType::*;
 use crate::token::Token;
 
 pub struct Parser {
-    tokens: Vec<Token>,
+    pub tokens: Vec<Token>,
     current: usize,
 }
 
 impl Parser {
-    pub fn parse<T: Expr>(&self) -> &dyn Expr {
+    pub fn new(tokens: Vec<Token>) -> Parser {
+	Parser { tokens, current: 0 }
+    }
+
+    pub fn parse(&mut self) -> Expr {
 	self.expression()
     }
 
-    fn expression(&self) ->  &dyn Expr {
+    fn expression(&mut self) ->  Expr {
 	let mut expr = self.equality();
 	while self.mtch(vec![Comma]) {
 	    let operator = self.previous();
 	    let right = self.expression();
-	    expr = &Binary { left: expr, operator, right };
+	    expr = Binary { left: Box::new(expr), operator, right: Box::new(right) };
 	}
 
 	expr
     }
 
-    fn equality(&self) -> &dyn Expr {
+    fn equality(&mut self) -> Expr {
 	let mut expr = self.comparison();
 
 	while self.mtch(vec![BangEqual, EqualEqual]) {
 	    let operator = self.previous();
 	    let right = self.comparison();
-	    expr = &Binary { left: expr, operator, right: right };
+	    expr = Binary { left: Box::new(expr), operator, right: Box::new(right) };
 	}
 
 	expr
     }
 
-    fn comparison(&self) -> &dyn Expr {
+    fn comparison(&mut self) -> Expr {
 	let mut expr = self.addition();
 
 	while self.mtch(vec![Greater, GreaterEqual, Less, LessEqual]) {
 	    let operator: Token = self.previous();
 	    let right = self.addition();
-	    expr = &Binary { left: expr, operator, right };
+	    expr = Binary { left: Box::new(expr), operator, right: Box::new(right) };
 	}
 
 	expr
     }
 
-    fn addition(&self) -> &dyn Expr {
+    fn addition(&mut self) -> Expr {
 	let mut expr = self.multiplication();
 
 	while self.mtch(vec![Minus, Plus]) {
 	    let operator = self.previous();
 	    let right = self.multiplication();
-	    expr = &Binary { left: expr, operator, right };
+	    expr = Binary { left: Box::new(expr), operator, right: Box::new(right) };
 	}
 
 	expr
     }
 
-    fn multiplication(&self) -> &dyn Expr {
+    fn multiplication(&mut self) -> Expr {
 	let mut expr = self.unary();
 
 	while self.mtch(vec![Slash, Star]) {
 	    let operator = self.previous();
 	    let right = self.unary();
-	    expr = &Binary { left: expr, operator, right };
+	    expr = Binary { left: Box::new(expr), operator, right: Box::new(right) };
 	}
 
 	expr
     }
 
-    fn unary(&self) -> &dyn Expr {
+    fn unary(&mut self) -> Expr {
 	if self.mtch(vec![Bang, Minus]) {
 	    let operator = self.previous();
 	    let right = self.unary();
-	    &Unary { operator, right }
+	    Unary { operator, right: Box::new(right) }
 	} else {
 	    self.primary()
 	}
     }
 
-    fn primary(&self) -> &dyn Expr {
+    fn primary(&mut self) -> Expr {
 	match self.peek().type_ {
-	    False => &Literal::False(false),
-	    True => &Literal::True(true),
-	    Nil => &Literal::Nil,
-	    Number { literal } => &Literal::Number(literal),
-	    STRING { literal } => &Literal::Strng(literal),
+	    False => Literal { value: Lit::False },
+	    True => Literal { value: Lit::True },
+	    Nil => Literal { value: Lit::Nil },
+	    Number { literal } => Literal { value: Lit::Number(literal) },
+	    STRING { literal } => Literal { value: Lit::Strng(literal) },
 	    LeftParen => {
 		let expr = self.expression();
-		self.consume(RightParen, "Expect ')' after expression.");
-		&Grouping { expression: expr }
+		self.consume(&RightParen, "Expect ')' after expression.");
+		Grouping { expression: Box::new(expr) }
+	    }
+	    _ => {
+		panic!()
 	    }
 	}
     }
 
-    fn consume(&self, type_: TokenType, message: &str) {
+    fn consume(&mut self, type_: &TokenType, message: &str) {
 	if self.check(type_) { self.advance(); }
-			
     }
 
-    fn mtch(&self, types: Vec<TokenType>) -> bool {
+    fn mtch(&mut self, types: Vec<TokenType>) -> bool {
 	for type_ in types.iter() {
-	    if self.check(*type_) {
+	    if self.check(type_) {
 		self.advance();
 		return true;
 	    }
@@ -112,27 +119,24 @@ impl Parser {
 	false
     }
 
-    fn check(&self, type_: TokenType) -> bool {
+    fn check(&self, token_type: &TokenType) -> bool {
 	if self.is_at_end() { return false; }
-	match self.peek().type_ {
-	    type_ => true,
-	    _ => false
-	}
+	token_type == &self.peek().type_
     }
 
     fn previous(&self) -> Token {
-	self.tokens[self.current - 1]
+	self.tokens[self.current - 1].clone()
     }
 
     fn peek(&self) -> Token {
-	self.tokens[self.current]
+	self.tokens[self.current].clone()
     }
 
     fn advance(&mut self) -> Token {
 	if !self.is_at_end() { self.current += 1 }
 	self.previous()
     }
-    
+
     fn is_at_end(&self) -> bool {
 	match self.peek().type_ {
 	    Eof => true,

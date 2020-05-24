@@ -284,5 +284,7 @@ Actually, seems like my traits knowledge is too weak, so made the visitor patter
 Broken: ast_generator.rs
 working, ish: expr.rs, ast_printer.rs
 
-// TODO: translate ch. 6 into rust
-// parser.rs + some changes to main / lox
+Fixed a bunch of things, but the parser is now compiling.
+
+parser issues:
+- error handling

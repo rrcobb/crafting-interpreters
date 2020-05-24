@@ -28,10 +28,10 @@ pub fn run_file(path: &str) {
 fn run(source: String) {
     let mut scanner = Scanner::new(source);
     let tokens = scanner.scan_tokens();
-    let parser = Parser { tokens, current: 0 };
+    let mut parser = Parser::new(tokens);
     let expression = parser.parse();
 
-    println!("{}", expression.accept(&AstPrinter {}));
+    println!("{}", (AstPrinter {}).print(expression));
 }
 
 // Lox.error: jlox/Lox.java L51
