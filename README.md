@@ -288,3 +288,45 @@ Fixed a bunch of things, but the parser is now compiling.
 
 parser issues:
 - error handling
+
+## Evaluating Expressions
+
+Challenges:
+1. Allowing comparisons on types other than numbers could be useful. The syntax is shorter than named function calls and might have a reasonable interpretation for some types like strings. Even comparisons among mixed types, like `3 < "pancake"` could be handy to enable things like heterogeneous ordered collections. Or it could lead to bugs and confused users.
+
+Would you extend Lox to support comparing other types? If so, which pairs of types do you allow and how do you define their ordering? Justify your choices and compare them to other languages.
+
+guess: comparison sounds dangerous, cut it
+
+more honestly: if there are nice types and traits, then ordering things seems like a nice trait to have. Otherwise, you're just overloading the operators, which... idk, seems like a weird way for a language to work.
+
+Ruby's method call syntax is nice, because it places operator overloading firmly within a 'normal' framework (even though the infix operators and assignment get some special weirdness in parsing).
+
+types that seem orderable:
+- strings against other strings (maybe length or alpha)
+- ... idk, booleans? what other types do we have? only the three kinds of literals, I think...
+- soo, maybe we need more types in order to think about overloading the > operator. If we had ints and floats, that usually seems pretty natural.
+
+answer:
+python has numeric comparison and string comparison (lexicographic), and a cool comparison of sets (partial ordering by subset / superset)
+
+Seems obnoxious until you're doing lots of set comparisons, probably
+
+2. Many languages define + such that if either operand is a string, the other is converted to a string and the results are then concatenated. For example, "scone" + 4 would yield scone4. Extend the code in visitBinaryExpr() to support that.
+
+I could, but I won't! It's so baaaad!
+
+Okay, I did, and it should be purged
+
+3. What happens right now if you divide a number by zero? What do you think should happen? Justify your choice. How do other languages you know handle division by zero and why do they make the choices they do?
+
+Change the implementation in visitBinaryExpr() to detect and report a runtime error for this case.
+
+Guess: Currently yields Java Infinity, which is _wild_. I didn't know that about Java!
+
+Fixed so it throws.
+
+
+TODO: Rust implementation of ch. 7
+
+
