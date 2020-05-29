@@ -11,7 +11,7 @@ fn main() {
 	    lexeme: "-".to_string(), 
 	    line: 1
 	},
-	right: Box::new(Literal { value: Lit::Number(123.0) })
+	right: Box::new(Literal { value: Value::Number(123.0) })
     };
     let operator = Token { 
 	type_: TokenType::Star,
@@ -19,7 +19,7 @@ fn main() {
 	line: 1
     };
     let right = Grouping {
-	expression: Box::new(Literal { value: Lit::Number(45.67) })
+	expression: Box::new(Literal { value: Value::Number(45.67) })
     };
     let expression = Binary { left: Box::new(left), operator, right: Box::new(right) };
 
@@ -34,7 +34,6 @@ impl AstPrinter {
     }
 
     fn parenthesize(&self, name: &str, exprs: Vec<&Expr>) -> String {
-	println!("parenthesizing");
 	let mut s = String::from(format!("({}", name));
 	for expr in exprs.iter() {
 	    s.push(' ');
@@ -47,7 +46,6 @@ impl AstPrinter {
 
 impl Visitor<String> for AstPrinter {
     fn visit_binary(&self, left: &Expr, operator: &Token, right: &Expr) -> String {
-	println!("printing a binary expr");
 	self.parenthesize(&operator.lexeme, vec![left, right])
     }
 
@@ -55,14 +53,13 @@ impl Visitor<String> for AstPrinter {
 	self.parenthesize("group", vec![expression])
     }
 
-    fn visit_literal(&self, val: &Lit) -> String {
-	println!("printing a literal expr");
+    fn visit_literal(&self, val: &Value) -> String {
 	match val {
-	    Lit::False => "false".to_string(),
-	    Lit::True => "true".to_string(),
-	    Lit::Nil => "nil".to_string(),
-	    Lit::Number(n) => format!("{}", n),
-	    Lit::Strng(s) => s.to_string(),
+	    Value::False => "false".to_string(),
+	    Value::True => "true".to_string(),
+	    Value::Nil => "nil".to_string(),
+	    Value::Number(n) => format!("{}", n),
+	    Value::Strng(s) => s.to_string(),
 	}
     }
 

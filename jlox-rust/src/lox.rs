@@ -3,7 +3,8 @@ use std::io;
 use std::io::prelude::*;
 use crate::scanner::*;
 use crate::parser::*;
-use crate::ast_printer::*;
+// use crate::ast_printer::*;
+use crate::interpreter::*;
 
 // Lox.runPrompt: jlox/Lox.java L30
 pub fn run_prompt() {
@@ -29,11 +30,10 @@ fn run(source: String) {
     let mut scanner = Scanner::new(source);
     let tokens = scanner.scan_tokens();
     let mut parser = Parser::new(tokens);
-    println!("parsing");
     let expression = parser.parse();
-    println!("parsed");
 
-    println!("{}", (AstPrinter {}).print(expression));
+    // println!("{}", (AstPrinter {}).print(expression));
+    (Interpreter {}).interpret(expression);
 }
 
 // Lox.error: jlox/Lox.java L51

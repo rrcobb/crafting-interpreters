@@ -326,7 +326,12 @@ Guess: Currently yields Java Infinity, which is _wild_. I didn't know that about
 
 Fixed so it throws.
 
+Implementation is not really so hard, but missing the error handling from before really is coming back to bite.
 
-TODO: Rust implementation of ch. 7
+I should go through and figure out what error types ought to propagate where, but I am not sure yet.
 
+Rust interpreter implemented, though it's all panicky
+Also fixed a parser bug with the unary grouping logic, it was dumb, and it is possibly dumber now
+
+But it works
 

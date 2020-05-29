@@ -3,6 +3,7 @@ use crate::expr::Expr::*;
 use crate::token_type::TokenType;
 use crate::token_type::TokenType::*;
 use crate::token::Token;
+use crate::ast_printer::*;
 
 pub struct Parser {
     pub tokens: Vec<Token>,
@@ -88,35 +89,48 @@ impl Parser {
     }
 
     fn primary(&mut self) -> Expr {
+	let mut advance = true;
 	let res = match self.peek().type_ {
-	    False => Literal { value: Lit::False },
-	    True => Literal { value: Lit::True },
-	    Nil => Literal { value: Lit::Nil },
-	    Number { literal } => Literal { value: Lit::Number(literal) },
-	    STRING { literal } => Literal { value: Lit::Strng(literal) },
+	    False => Literal { value: Value::False },
+	    True => Literal { value: Value::True },
+	    Nil => Literal { value: Value::Nil },
+	    Number { literal } => Literal { value: Value::Number(literal) },
+	    STRING { literal } => Literal { value: Value::Strng(literal) },
 	    LeftParen => {
+		// move past the left paren
 		self.advance();
+		// consume the expression
 		let expr = self.expression();
+		println!("{}", (AstPrinter {}).print(expr.clone()));
+		// eat the right paren
 		self.consume(&RightParen, "Expect ')' after expression.");
+		// don't advance past the right paren
+		advance = false;
 		Grouping { expression: Box::new(expr) }
+
 	    }
 	    _ => {
 		panic!("failed in primary on not matching")
 	    }
 	};
-	self.advance();
+	// hacky skip for grouping
+	if advance { self.advance(); }
 	res
     }
 
+    // currently does not do the erroring that the Java version does
     fn consume(&mut self, type_: &TokenType, message: &str) {
-	if self.check(type_) { self.advance(); }
+	if self.check(type_) { 
+	    self.advance();
+	} else {
+	    println!("{}", message);
+	}
+
     }
 
     fn mtch(&mut self, types: Vec<TokenType>) -> bool {
-	println!("checking {:?} against {:?}", self.peek().type_, types);
 	for type_ in types.iter() {
 	    if self.check(type_) {
-		println!("and it matched");
 		self.advance();
 		return true;
 	    }
