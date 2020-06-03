@@ -3,20 +3,34 @@ package jlox;
 import java.util.List;
 
 // prints a reverse polish notation string representation of AST nodes
-class RpnPrinter implements Expr.Visitor<String> {
+class RpnPrinter implements Expr.Visitor<String>, Stmt.Visitor<Void> {
   public static void main(String[] args) {
     String source = "1 + ((0+1, 6*7) ? 2 : 3 + 8) + 4";
     Scanner scanner = new Scanner(source);
     List<Token> tokens = scanner.scanTokens();
     Parser parser = new Parser(tokens);
-    Expr expression = parser.parse();
+    List<Stmt> statements = parser.parse();
 
-    System.out.println(new RpnPrinter().print(expression));
+    new RpnPrinter().print(statements);
   }
 
   String print(Expr expr) {
     return expr.accept(this);
   }
+
+  Void print(List<Stmt> statements) {
+    for (Stmt statement : statements) {
+      statement.accept(this);
+    }
+  }
+
+  @Override
+  public Void visitPrintStmt(Stmt.Print stmt) {
+    String value = print(stmt.expression);
+    System.out.println(value);
+    return null;
+  }
+
 
   @Override
   public String visitBinaryExpr(Expr.Binary expr) {

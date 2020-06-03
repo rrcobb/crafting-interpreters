@@ -335,3 +335,12 @@ Also fixed a parser bug with the unary grouping logic, it was dumb, and it is po
 
 But it works
 
+## Chapter 8 Statements and State
+
+Lots to do in this chapter, so much going on
+
+- expression statements and print statements
+- expr statement: expr;
+- print statement: print expr;
+
+one of the deep differences between statements and expressions is that expressions produce a value, and statements don't.
