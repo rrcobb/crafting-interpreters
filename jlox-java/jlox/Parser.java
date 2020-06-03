@@ -8,10 +8,15 @@ import static jlox.TokenType.*;
 /*
  * Implementation of the parsing for the following grammar:
 
-program   → statement* EOF ;
+program     → declaration* EOF ;
 
-statement → exprStmt
-          | printStmt ;
+declaration → varDecl
+            | statement ;
+
+varDecl → "var" IDENTIFIER ( "=" expression )? ";" ;
+
+statement   → exprStmt
+            | printStmt ;
 
 exprStmt  → expression ";" ;
 printStmt → "print" expression ";" ;
@@ -24,8 +29,9 @@ addition       → multiplication ( ( "-" | "+" ) multiplication )* ;
 multiplication → unary ( ( "/" | "*" ) unary )* ;
 unary          → ( "!" | "-" ) unary
                | primary ;
-primary        → NUMBER | STRING | "false" | "true" | "nil"
-               | "(" expression ")" ;
+primary → "true" | "false" | "nil" | NUMBER | STRING
+        | "(" expression ")"
+        | IDENTIFIER ;
 
  *
  *
