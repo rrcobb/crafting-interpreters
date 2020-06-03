@@ -344,3 +344,6 @@ Lots to do in this chapter, so much going on
 - print statement: print expr;
 
 one of the deep differences between statements and expressions is that expressions produce a value, and statements don't.
+
+
+Todo: make the ternary operator work again, fix the grammar to reflect it properly

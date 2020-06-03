@@ -98,18 +98,22 @@ class Parser {
     return new Stmt.Expression(expr);
   }
 
-  // expression     → ternary ( "," ternary )* ;
   private Expr expression() {
     return assignment();
   }
 
   private Expr assignment() {
-    Expr expr = ternary();
+    Expr expr = equality();
+    if (match(EQUAL)) {
+      Token equals = previous();
+      Expr value = assignment();
 
-    while(match(COMMA)) {
-      Token operator = previous();
-      Expr right = expression();
-      expr = new Expr.Binary(expr, operator, right);
+      if (expr instanceof Expr.Variable) {
+        Token name = ((Expr.Variable)expr).name;
+        return new Expr.Assign(name, value);
+      }
+
+      error(equals, "Invalid assignment target.");
     }
 
     return expr;
