@@ -54,6 +54,11 @@ impl stmt::Visitor<()> for Interpreter {
     fn visit_expression(&self, expr: &Expr) {
 	self.evaluate(expr);
     }
+
+    fn visit_var(&self, name: &Token, initializer: &Expr) {
+	let value = self.evaluate(initializer);
+	// need to define the variable here
+    }
 }
 
 impl expr::Visitor<Value> for Interpreter {
@@ -133,5 +138,10 @@ impl expr::Visitor<Value> for Interpreter {
 	    TokenType::Bang => Value::from(!self.is_truthy(right)),
 	    _ => panic!("unary operator should only be minus or bang")
 	}
+    }
+
+    fn visit_variable(&self, name: &Token) -> Value {
+	// need to access the variable from the environment
+	Value::Nil
     }
 }

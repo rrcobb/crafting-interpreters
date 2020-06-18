@@ -6,7 +6,7 @@ mod token;
 mod expr;
 mod stmt;
 mod parser;
-mod ast_printer;
+// mod ast_printer;
 mod interpreter;
 
 use crate::lox::*;

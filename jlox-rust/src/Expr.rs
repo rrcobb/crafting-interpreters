@@ -22,6 +22,9 @@ pub enum Expr {
 		// there's a small of tokens that can be unary operators - just Minus and Bang
 		operator: Token,
 		right: Box<Expr>,
+	},
+	Variable {
+	    name: Token,
 	}
 }
 
@@ -30,6 +33,7 @@ pub trait Visitor<T> {
 	fn visit_grouping(&self, expression: &Expr) -> T;
 	fn visit_literal(&self, value: &Value) -> T;
 	fn visit_unary(&self, operator: &Token, right: &Expr) -> T;
+	fn visit_variable(&self, name: &Token) -> T;
 }
 
 impl Expr {
@@ -40,6 +44,7 @@ impl Expr {
 			Grouping { expression } => visitor.visit_grouping(expression),
 			Literal { value }=> visitor.visit_literal(value),
 			Unary { operator, right } => visitor.visit_unary(operator, right),
+			Variable { name } => visitor.visit_variable(name),
 		}
 	}
 }

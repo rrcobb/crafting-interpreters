@@ -1,7 +1,6 @@
 use crate::expr::*;
 use crate::expr::Expr::*;
 use crate::stmt::*;
-use crate::stmt::Stmt::*;
 use crate::token_type::TokenType;
 use crate::token_type::TokenType::*;
 use crate::token::Token;
@@ -20,9 +19,17 @@ impl Parser {
     pub fn parse(&mut self) -> Vec<Stmt> {
 	let mut stmts: Vec<Stmt> = vec![];
 	while !self.is_at_end() {
-	    stmts.push(self.statement());
+	    stmts.push(self.declaration());
 	}
 	stmts
+    }
+
+    fn declaration(&mut self) -> Stmt {
+	if self.mtch(vec![TokenType::Var]) {
+	    self.var_declaration()
+	} else {
+	    self.statement()
+	}
     }
 
     fn statement(&mut self) -> Stmt {
@@ -31,6 +38,18 @@ impl Parser {
 	} else {
 	    self.expression_statement()
 	}
+    }
+
+    fn var_declaration(&mut self) -> Stmt {
+	let name = self.consume(&Identifier, "Expect variable name").unwrap();
+
+	let mut initializer = Expr::Literal { value: Value::Nil };
+	if self.mtch(vec![Equal]) {
+	    initializer = self.expression();
+	}
+
+	self.consume(&Semicolon, "Expect ';' after variable declaration");
+	Stmt::Var { name, initializer: Box::new(initializer) } 	
     }
 
     fn print_statement(&mut self) -> Stmt {
@@ -122,6 +141,8 @@ impl Parser {
 	    Nil => Literal { value: Value::Nil },
 	    Number { literal } => Literal { value: Value::Number(literal) },
 	    STRING { literal } => Literal { value: Value::Strng(literal) },
+	    // not quite a transliteration, because we're rust match, and we're advancing after
+	    Identifier => Variable { name: self.peek() },
 	    LeftParen => {
 		// move past the left paren
 		self.advance();
@@ -144,11 +165,12 @@ impl Parser {
     }
 
     // currently does not do the erroring that the Java version does
-    fn consume(&mut self, type_: &TokenType, message: &str) {
+    fn consume(&mut self, type_: &TokenType, message: &str) -> Option<Token> {
 	if self.check(type_) { 
-	    self.advance();
+	    Some(self.advance())
 	} else {
 	    println!("{}", message);
+	    None
 	}
     }
 
