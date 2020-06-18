@@ -8,14 +8,16 @@ mod stmt;
 mod parser;
 // mod ast_printer;
 mod interpreter;
+mod environment;
 
-use crate::lox::*;
+use crate::lox::Lox;
 // Lox.main: jlox/Lox.java L14
 fn main() {
     let args: Vec<String> = env::args().collect();
+    let mut lox = Lox::new();
     match args.len() {
-       1 => run_prompt(),
-       2 => run_file(&args[1]),
+       1 => lox.run_prompt(),
+       2 => lox.run_file(&args[1]),
        _ => println!("Usage: jlox [script]")
     }
 }

@@ -4,21 +4,30 @@ use crate::stmt;
 use crate::stmt::Stmt;
 use crate::token::Token;
 use crate::token_type::TokenType;
+use crate::environment::Environment;
 
-pub struct Interpreter {}
+pub struct Interpreter {
+    environment: Box<Environment>
+}
 
 impl Interpreter {
-    pub fn interpret(&self, stmts: Vec<Stmt>) {
+    pub fn new() -> Interpreter {
+	Interpreter {
+	    environment: Box::new(Environment::new())
+	}
+    }
+
+    pub fn interpret(&mut self, stmts: Vec<Stmt>) {
 	for stmt in stmts {
 	    self.execute(&stmt);
 	}
     }
 
-    fn execute(&self, stmt: &Stmt) {
+    fn execute(&mut self, stmt: &Stmt) {
 	stmt.accept(self);
     }
 
-    fn evaluate(&self, expr: &Expr) -> Value {
+    fn evaluate(&mut self, expr: &Expr) -> Value {
 	expr.accept(self)
     }
 
@@ -46,31 +55,37 @@ impl Interpreter {
 }
 
 impl stmt::Visitor<()> for Interpreter {
-    fn visit_print(&self, expr: &Expr) {
+    fn visit_print(&mut self, expr: &Expr) {
 	let val = self.evaluate(expr);
 	println!("{}", val);	
     }
 
-    fn visit_expression(&self, expr: &Expr) {
+    fn visit_expression(&mut self, expr: &Expr) {
 	self.evaluate(expr);
     }
 
-    fn visit_var(&self, name: &Token, initializer: &Expr) {
+    fn visit_var(&mut self, name: &Token, initializer: &Expr) {
 	let value = self.evaluate(initializer);
-	// need to define the variable here
+	self.environment.define(&name.lexeme, value);	
     }
 }
 
 impl expr::Visitor<Value> for Interpreter {
+    fn visit_assignment(&mut self, name: &Token, value: &Expr) -> Value {
+	let val = self.evaluate(value);
+	self.environment.assign(name, val.clone());
+	val
+    }
+
     fn visit_literal(&self, val: &Value) -> Value {
 	val.clone()
     }
 
-    fn visit_grouping(&self, expression: &Expr) -> Value {
+    fn visit_grouping(&mut self, expression: &Expr) -> Value {
 	self.evaluate(expression)
     }
 
-    fn visit_binary(&self, left: &Expr, operator: &Token, right: &Expr) -> Value {
+    fn visit_binary(&mut self, left: &Expr, operator: &Token, right: &Expr) -> Value {
 	let lt = self.evaluate(left);
 	let rt = self.evaluate(right);
 	
@@ -129,7 +144,7 @@ impl expr::Visitor<Value> for Interpreter {
 	}
     }
 
-    fn visit_unary(&self, operator: &Token, expr: &Expr) -> Value {
+    fn visit_unary(&mut self, operator: &Token, expr: &Expr) -> Value {
 	let right = self.evaluate(expr);
 	match operator.type_ {
 	    TokenType::Minus => {
@@ -141,7 +156,6 @@ impl expr::Visitor<Value> for Interpreter {
     }
 
     fn visit_variable(&self, name: &Token) -> Value {
-	// need to access the variable from the environment
-	Value::Nil
+	self.environment.get(name)
     }
 }

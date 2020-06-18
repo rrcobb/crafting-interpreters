@@ -10,13 +10,13 @@ pub enum Stmt {
 }
 
 pub trait Visitor<T> {
-    fn visit_print(&self, expr: &Expr) -> T;
-    fn visit_expression(&self, expr: &Expr) -> T;
-    fn visit_var(&self, name: &Token, initializer: &Expr) -> T;
+    fn visit_print(&mut self, expr: &Expr) -> T;
+    fn visit_expression(&mut self, expr: &Expr) -> T;
+    fn visit_var(&mut self, name: &Token, initializer: &Expr) -> T;
 }
 
 impl Stmt {
-    pub fn accept<T, V: Visitor<T>>(&self, visitor: &V) -> T {
+    pub fn accept<T, V: Visitor<T>>(&self, visitor: &mut V) -> T {
 	use crate::stmt::Stmt::*;
 	match self {
 	    Print { expr } => visitor.visit_print(expr),
