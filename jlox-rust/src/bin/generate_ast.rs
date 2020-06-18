@@ -1,5 +1,6 @@
 // transliteration of tool/GenerateAst.java
 // not idiomatic Rust
+// maybe could be a macro, since that's the appropriate way to do this in rust, I think
 use std::env;
 use std::fs::{File};
 use std::io::prelude::*;

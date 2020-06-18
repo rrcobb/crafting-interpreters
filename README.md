@@ -345,5 +345,19 @@ Lots to do in this chapter, so much going on
 
 one of the deep differences between statements and expressions is that expressions produce a value, and statements don't.
 
-
 Todo: make the ternary operator work again, fix the grammar to reflect it properly
+Todo: ch. 8 challenges
+TODO: Rust for chapter 8
+
+- DONE statements to the 'generator'
+    DONE this will actually mean adding an expr.rs file I think
+- DONE parser updates for statements
+- DONE interpreter updates for statements
+
+interpreter still panics in bad ways, which is the current worst thing
+
+
+- adding assignment expressions
+- environment to keep track of state
+- block statements
+

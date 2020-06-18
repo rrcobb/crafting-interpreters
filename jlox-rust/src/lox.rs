@@ -30,10 +30,10 @@ fn run(source: String) {
     let mut scanner = Scanner::new(source);
     let tokens = scanner.scan_tokens();
     let mut parser = Parser::new(tokens);
-    let expression = parser.parse();
+    let stmts = parser.parse();
 
     // println!("{}", (AstPrinter {}).print(expression));
-    (Interpreter {}).interpret(expression);
+    (Interpreter {}).interpret(stmts);
 }
 
 // Lox.error: jlox/Lox.java L51

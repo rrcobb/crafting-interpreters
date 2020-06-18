@@ -1,9 +1,11 @@
 use crate::expr::*;
 use crate::expr::Expr::*;
+use crate::stmt::*;
+use crate::stmt::Stmt::*;
 use crate::token_type::TokenType;
 use crate::token_type::TokenType::*;
 use crate::token::Token;
-use crate::ast_printer::*;
+// use crate::ast_printer::*;
 
 pub struct Parser {
     pub tokens: Vec<Token>,
@@ -15,8 +17,32 @@ impl Parser {
 	Parser { tokens, current: 0 }
     }
 
-    pub fn parse(&mut self) -> Expr {
-	self.expression()
+    pub fn parse(&mut self) -> Vec<Stmt> {
+	let mut stmts: Vec<Stmt> = vec![];
+	while !self.is_at_end() {
+	    stmts.push(self.statement());
+	}
+	stmts
+    }
+
+    fn statement(&mut self) -> Stmt {
+	if self.mtch(vec![TokenType::Print]) {
+	    self.print_statement()
+	} else {
+	    self.expression_statement()
+	}
+    }
+
+    fn print_statement(&mut self) -> Stmt {
+	let value = self.expression();
+	self.consume(&Semicolon, "Expect ';' after value.");
+	Stmt::Print { expr: Box::new(value) }	
+    }
+
+    fn expression_statement(&mut self) -> Stmt {
+	let value = self.expression();
+	self.consume(&Semicolon, "Expect ';' after value.");
+	Stmt::Expression { expr: Box::new(value) }	
     }
 
     fn expression(&mut self) ->  Expr {
@@ -101,7 +127,6 @@ impl Parser {
 		self.advance();
 		// consume the expression
 		let expr = self.expression();
-		println!("{}", (AstPrinter {}).print(expr.clone()));
 		// eat the right paren
 		self.consume(&RightParen, "Expect ')' after expression.");
 		// don't advance past the right paren
@@ -125,7 +150,6 @@ impl Parser {
 	} else {
 	    println!("{}", message);
 	}
-
     }
 
     fn mtch(&mut self, types: Vec<TokenType>) -> bool {

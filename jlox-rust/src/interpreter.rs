@@ -1,14 +1,21 @@
-use crate::expr::*;
+use crate::expr;
+use expr::{Expr, Value};
+use crate::stmt;
+use crate::stmt::Stmt;
 use crate::token::Token;
-use crate::expr::Value;
 use crate::token_type::TokenType;
 
 pub struct Interpreter {}
 
 impl Interpreter {
-    pub fn interpret(&self, expr: Expr) {
-	let value = self.evaluate(&expr);
-	println!("{}", value);
+    pub fn interpret(&self, stmts: Vec<Stmt>) {
+	for stmt in stmts {
+	    self.execute(&stmt);
+	}
+    }
+
+    fn execute(&self, stmt: &Stmt) {
+	stmt.accept(self);
     }
 
     fn evaluate(&self, expr: &Expr) -> Value {
@@ -38,7 +45,18 @@ impl Interpreter {
     }
 }
 
-impl Visitor<Value> for Interpreter {
+impl stmt::Visitor<()> for Interpreter {
+    fn visit_print(&self, expr: &Expr) {
+	let val = self.evaluate(expr);
+	println!("{}", val);	
+    }
+
+    fn visit_expression(&self, expr: &Expr) {
+	self.evaluate(expr);
+    }
+}
+
+impl expr::Visitor<Value> for Interpreter {
     fn visit_literal(&self, val: &Value) -> Value {
 	val.clone()
     }

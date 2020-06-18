@@ -4,6 +4,7 @@ mod token_type;
 mod scanner;
 mod token;
 mod expr;
+mod stmt;
 mod parser;
 mod ast_printer;
 mod interpreter;
