@@ -5,15 +5,17 @@ use crate::stmt::Stmt;
 use crate::token::Token;
 use crate::token_type::TokenType;
 use crate::environment::Environment;
+use std::rc::Rc;
+use std::cell::RefCell;
 
 pub struct Interpreter {
-    environment: Box<Environment>
+    environment: Rc<RefCell<Environment>>
 }
 
 impl Interpreter {
     pub fn new() -> Interpreter {
 	Interpreter {
-	    environment: Box::new(Environment::new())
+	    environment: Rc::new(RefCell::new(Environment::new()))
 	}
     }
 
@@ -52,9 +54,27 @@ impl Interpreter {
 	    _ => panic!("operand must be a number")
 	}
     }
+
 }
 
 impl stmt::Visitor<()> for Interpreter {
+    // for if we want to move the logic to another fn
+    // self.execute_block( stmts, Environment::within(*self.environment));
+    fn visit_block(&mut self, stmts: &Vec<Stmt>) {
+	// prev is a Rc<Environment>
+	let prev = self.environment.clone();
+	let new = Rc::new(RefCell::new(Environment::from(&self.environment)));
+	let steps = || {
+	    self.environment = new;
+	    for stmt in stmts.iter() {
+		self.execute(stmt);
+	    }
+	};
+	let res = steps();
+	self.environment = prev;
+	res
+    }
+
     fn visit_print(&mut self, expr: &Expr) {
 	let val = self.evaluate(expr);
 	println!("{}", val);	
@@ -66,14 +86,14 @@ impl stmt::Visitor<()> for Interpreter {
 
     fn visit_var(&mut self, name: &Token, initializer: &Expr) {
 	let value = self.evaluate(initializer);
-	self.environment.define(&name.lexeme, value);	
+	self.environment.borrow_mut().define(&name.lexeme, value);	
     }
 }
 
 impl expr::Visitor<Value> for Interpreter {
     fn visit_assignment(&mut self, name: &Token, value: &Expr) -> Value {
 	let val = self.evaluate(value);
-	self.environment.assign(name, val.clone());
+	self.environment.borrow_mut().assign(name, val.clone());
 	val
     }
 
@@ -156,6 +176,6 @@ impl expr::Visitor<Value> for Interpreter {
     }
 
     fn visit_variable(&self, name: &Token) -> Value {
-	self.environment.get(name)
+	self.environment.borrow().get(name)
     }
 }

@@ -3,10 +3,12 @@
 use crate::expr::Value;
 use crate::token::Token;
 use std::collections::HashMap;
+use std::rc::Rc;
+use std::cell::RefCell;
 
 pub struct Environment {
     values: HashMap<String, Value>,
-    enclosing: Option<Box<Environment>>
+    enclosing: Option<Rc<RefCell<Environment>>>
 }
     
 impl Environment {
@@ -17,40 +19,38 @@ impl Environment {
         }
     }
 
-    pub fn within(enclosing: Environment) -> Environment {
+    pub fn from(enclosing: &Rc<RefCell<Environment>>) -> Environment {
         Environment {
             values: HashMap::new(),
-            enclosing: Some(Box::new(enclosing))
+            enclosing: Some(Rc::clone(enclosing)),
         }
     }
 
     pub fn get(&self, name: &Token) -> Value {
-        match self.values.get(&name.lexeme) {
-            Some(value) => value.clone(),
-            None => {
-               match &self.enclosing {
-                   Some(enclosing) => enclosing.get(name),
-                   None => {
-                       panic!("Undefined variable '{}'.", name.lexeme);
-                   }
-               }
+        if let Some(value) = self.values.get(&name.lexeme) {
+            value.clone()
+        } else {
+            match &self.enclosing {
+                Some(enclosing) => enclosing.borrow().get(name),
+                None => panic!("Undefined variable '{}'.", name.lexeme)
             }
         }
     }
 
     pub fn define(&mut self, name: &str, value: Value) {
-        self.values.insert(name.to_string(), value);
+        self.values.insert(name.to_owned(), value);
     }
 
     pub fn assign(&mut self, name: &Token, value: Value) {
-        match self.values.get(&name.lexeme) { 
-            Some(_) => { self.values.insert(name.lexeme.to_owned(), value); },
-            None => {
-                if self.enclosing.is_some() {
-                    self.enclosing.as_mut().unwrap().assign(&name, value.clone());
-                } else {
-                    panic!("Undefined variable '{}'.", name.lexeme);
-                }
+        if self.values.contains_key(&name.lexeme) {
+            // have to copy the string for the hashmap
+            self.values.insert(name.lexeme.to_owned(), value);
+            return;
+        } else {
+            if let Some(enclosing) = &self.enclosing {
+                enclosing.borrow_mut().assign(&name, value);
+            } else {
+                panic!("Undefined variable '{}'.", name.lexeme); 
             }
         }
     }

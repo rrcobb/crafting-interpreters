@@ -4,14 +4,16 @@ use crate::expr::Expr;
 use crate::token::Token;
 
 pub enum Stmt {
-    Print { expr: Box<Expr> },
+    Block { stmts: Vec<Stmt> },
     Expression { expr: Box<Expr> },
+    Print { expr: Box<Expr> },
     Var { name: Token, initializer: Box<Expr> }
 }
 
 pub trait Visitor<T> {
-    fn visit_print(&mut self, expr: &Expr) -> T;
+    fn visit_block(&mut self, stmts: &Vec<Stmt>) -> T;
     fn visit_expression(&mut self, expr: &Expr) -> T;
+    fn visit_print(&mut self, expr: &Expr) -> T;
     fn visit_var(&mut self, name: &Token, initializer: &Expr) -> T;
 }
 
@@ -19,8 +21,9 @@ impl Stmt {
     pub fn accept<T, V: Visitor<T>>(&self, visitor: &mut V) -> T {
 	use crate::stmt::Stmt::*;
 	match self {
-	    Print { expr } => visitor.visit_print(expr),
+	    Block { stmts } => visitor.visit_block(stmts),
 	    Expression { expr } => visitor.visit_expression(expr),
+	    Print { expr } => visitor.visit_print(expr),
 	    Var { name, initializer } => visitor.visit_var(name, initializer),
 	}
     }

@@ -16,20 +16,20 @@ pub enum Expr {
 	operator: Token,
 	right: Box<Expr>,
     },
-	Grouping {
-	    expression: Box<Expr>,
-	},
-	Literal {
-	    value: Value,
-	},
-	Unary {
-	    // there's a small of tokens that can be unary operators - just Minus and Bang
-	    operator: Token,
-	    right: Box<Expr>,
-	},
-	Variable {
-	    name: Token,
-	}
+    Grouping {
+	expression: Box<Expr>,
+    },
+    Literal {
+	value: Value,
+    },
+    Unary {
+	// there's a small of tokens that can be unary operators - just Minus and Bang
+	operator: Token,
+	right: Box<Expr>,
+    },
+    Variable {
+	name: Token,
+    }
 }
 
 pub trait Visitor<T> {

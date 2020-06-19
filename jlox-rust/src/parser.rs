@@ -35,6 +35,8 @@ impl Parser {
     fn statement(&mut self) -> Stmt {
 	if self.mtch(vec![TokenType::Print]) {
 	    self.print_statement()
+	} else if self.mtch(vec![TokenType::LeftParen]) {
+	    self.block_statement()
 	} else {
 	    self.expression_statement()
 	}
@@ -58,18 +60,35 @@ impl Parser {
 	Stmt::Print { expr: Box::new(value) }	
     }
 
+    fn block_statement(&mut self) -> Stmt {
+	let mut stmts = vec![];
+	while !self.check(&RightParen) && !self.is_at_end() {
+	    stmts.push(self.declaration());
+	}
+	self.consume(&RightParen, "Expect '}' after block.");
+	Stmt::Block { stmts }
+    }
+
     fn expression_statement(&mut self) -> Stmt {
 	let value = self.expression();
 	self.consume(&Semicolon, "Expect ';' after value.");
 	Stmt::Expression { expr: Box::new(value) }	
     }
 
-    fn expression(&mut self) ->  Expr {
+    fn expression(&mut self) -> Expr {
+	self.assignment()
+    }
+
+    fn assignment(&mut self) ->  Expr {
 	let mut expr = self.equality();
-	while self.mtch(vec![Comma]) {
-	    let operator = self.previous();
-	    let right = self.expression();
-	    expr = Binary { left: Box::new(expr), operator, right: Box::new(right) };
+
+	if self.mtch(vec![Equal]) {
+	    // let equals = self.previous(); needed only if we're erroring with a token
+	    let value = self.equality();
+	    expr = match expr {
+		Variable { name } => Expr::Assign { name, value: Box::new(value) },
+		_ => { panic!("Invalid assignment target."); }
+	    };
 	}
 
 	expr
@@ -156,6 +175,7 @@ impl Parser {
 
 	    }
 	    _ => {
+		println!("failing token {:?}", self.peek());
 		panic!("failed in primary on not matching")
 	    }
 	};
