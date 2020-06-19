@@ -58,21 +58,14 @@ impl Interpreter {
 }
 
 impl stmt::Visitor<()> for Interpreter {
-    // for if we want to move the logic to another fn
-    // self.execute_block( stmts, Environment::within(*self.environment));
     fn visit_block(&mut self, stmts: &Vec<Stmt>) {
-	// prev is a Rc<Environment>
 	let prev = self.environment.clone();
 	let new = Rc::new(RefCell::new(Environment::from(&self.environment)));
-	let steps = || {
-	    self.environment = new;
-	    for stmt in stmts.iter() {
-		self.execute(stmt);
-	    }
-	};
-	let res = steps();
+	self.environment = new;
+	for stmt in stmts.iter() {
+	    self.execute(stmt);
+	}
 	self.environment = prev;
-	res
     }
 
     fn visit_print(&mut self, expr: &Expr) {

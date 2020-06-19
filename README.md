@@ -348,17 +348,17 @@ one of the deep differences between statements and expressions is that expressio
 In progress: Rust for ch 8
 
 - DONE statements to the 'generator'
-    DONE this will actually mean adding an expr.rs file I think
+- DONE this will actually mean adding an stmt.rs file I think
 - DONE parser updates for statements
 - DONE interpreter updates for statements
 - DONE adding assignment expressions
 - DONE environment to keep track of state
+- DONE block statements
 
 Fought it hard, but ended up using Rc and RefCell for the environment and the interpreter reference to the environment. I thought I could get away with Box, but apparently, no.
 
-- BUGGY block statements
-
 Getting a parser error, probably not doing the parsing right
+(the parser error was using leftparen and rightparen instead of leftbrace and rightbrace, like a bozo)
 
 Interpreter still panics in bad ways, which is the current worst thing
 

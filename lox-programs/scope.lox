@@ -1,9 +1,12 @@
 var a = "global a";
+print a;
 var b = "global b";
 var c = "global c";
 {
   var a = "outer a";
   var b = "outer b";
+  print b;
+  print c;
   {
     var a = "inner a";
     print a;

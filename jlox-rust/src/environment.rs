@@ -6,13 +6,23 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::cell::RefCell;
 
+#[derive(Debug)]
 pub struct Environment {
     values: HashMap<String, Value>,
     enclosing: Option<Rc<RefCell<Environment>>>
 }
-    
+
+// for visualizing environment drops
+// impl Drop for Environment {
+//    fn drop(&mut self) {
+//        println!("Dropping environment! Had values: {:?}", self.values) 
+//    }
+//}
+
+
 impl Environment {
     pub fn new() -> Environment {
+  //      println!("Creating new environment");
         Environment {
             values: HashMap::new(),
             enclosing: None
@@ -20,6 +30,7 @@ impl Environment {
     }
 
     pub fn from(enclosing: &Rc<RefCell<Environment>>) -> Environment {
+//        println!("Creating environment from another");
         Environment {
             values: HashMap::new(),
             enclosing: Some(Rc::clone(enclosing)),
