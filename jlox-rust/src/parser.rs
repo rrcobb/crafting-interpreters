@@ -35,7 +35,7 @@ impl Parser {
     fn statement(&mut self) -> Stmt {
 	if self.mtch(vec![TokenType::Print]) {
 	    self.print_statement()
-	} else if self.mtch(vec![TokenType::LeftParen]) {
+	} else if self.mtch(vec![TokenType::LeftBrace]) {
 	    self.block_statement()
 	} else {
 	    self.expression_statement()
@@ -62,10 +62,10 @@ impl Parser {
 
     fn block_statement(&mut self) -> Stmt {
 	let mut stmts = vec![];
-	while !self.check(&RightParen) && !self.is_at_end() {
+	while !self.check(&RightBrace) && !self.is_at_end() {
 	    stmts.push(self.declaration());
 	}
-	self.consume(&RightParen, "Expect '}' after block.");
+	self.consume(&RightBrace, "Expect '}' after block.");
 	Stmt::Block { stmts }
     }
 
