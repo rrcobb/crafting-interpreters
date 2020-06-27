@@ -365,9 +365,19 @@ Todo: make the ternary operator work again, fix the grammar to reflect it proper
 Todo: ch. 8 challenges
 
 Challenges:
-  1 evaluate expressions in the REPL
-  2 remove initialization to nil, and make runtime access of undefined an error
-  3 deal with strange scope program in conflicting_scope.lox
+1 evaluate expressions in the REPL
+
+Add a check for the whole program, and switch to calling the evaluate expression path if the program is a single expression
+
+questions: 
+- should this logic go in the parser or the interpreter?
+- should it be a global setting on the parser?
+- should it allow all kinds 'statements without ;', or just expression statements?
+
+Possible: if the parser sees just one expression statement, and it's at the end of parsing an expression statement, then it can recover from the error and the expression into an expression statement, then pass it to the interpreter.
+
+2 remove initialization to nil, and make runtime access of undefined an error
+3 deal with strange scope program in conflicting_scope.lox
 
 > What does the following program do?
 > 
@@ -380,5 +390,5 @@ Challenges:
 
 It prints 3, and leaves the outer-scoped 'a' with the value 1.
 
-This sorta makes sense, since the lookup happens 'before' the local variable is created. weird
+This sorta makes sense, since the lookup happens 'before' the local variable is created. weird, though, because maybe it should be an error for accessing the uninitialized 'a' before it's created. To 'fix' this behavior to raise this error, maybe you have to register the declaration on the lhs, create that 'slot' before you evaluate the expression on the rhs. Solving challenge #2 should help with this.
 
