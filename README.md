@@ -357,10 +357,28 @@ In progress: Rust for ch 8
 
 Fought it hard, but ended up using Rc and RefCell for the environment and the interpreter reference to the environment. I thought I could get away with Box, but apparently, no.
 
-Getting a parser error, probably not doing the parsing right
-(the parser error was using leftparen and rightparen instead of leftbrace and rightbrace, like a bozo)
+DONE Getting a parser error, probably not doing the parsing right (the parser error was using leftparen and rightparen instead of leftbrace and rightbrace, like a bozo)
 
 Interpreter still panics in bad ways, which is the current worst thing
 
 Todo: make the ternary operator work again, fix the grammar to reflect it properly
 Todo: ch. 8 challenges
+
+Challenges:
+  1 evaluate expressions in the REPL
+  2 remove initialization to nil, and make runtime access of undefined an error
+  3 deal with strange scope program in conflicting_scope.lox
+
+> What does the following program do?
+> 
+> var a = 1;
+> {
+>   var a = a + 2;
+>   print a;
+> }
+> What did you expect it to do? Is it what you think it should do? What does analogous code in other languages you are familiar with do? What do you think users will expect this to do?
+
+It prints 3, and leaves the outer-scoped 'a' with the value 1.
+
+This sorta makes sense, since the lookup happens 'before' the local variable is created. weird
+
