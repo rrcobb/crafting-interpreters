@@ -18,17 +18,21 @@ varDecl → "var" IDENTIFIER ( "=" expression )? ";" ;
 statement   → exprStmt
             | ifStmt
             | printStmt
+            | whileStmt
             | block;
 
 exprStmt  → expression ";" ;
 ifStmt    → "if" "(" expression ")" statement ( "else" statement )? ;
 printStmt → "print" expression ";" ;
+whileStmt → "while" "(" expression ")" statement ;
 block → '{' statement* '}' ;
 
 expression → assignment ;
-assignment → IDENTIFIER "=" assignment
-           | ternary;
-ternary        → equality ( "?" expression ":" expression )? ;
+assignment → identifier "=" assignment
+           | logic_or ;
+logic_or   → logic_and ( "or" logic_and )* ;
+logic_and  → equality ( "and" equality )* ;
+
 equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 comparison     → addition ( ( ">" | ">=" | "<" | "<=" ) addition )* ;
 addition       → multiplication ( ( "-" | "+" ) multiplication )* ;
@@ -88,6 +92,7 @@ class Parser {
   private Stmt statement() {
     if (match(IF)) return ifStatement();
     if (match(PRINT)) return printStatement();
+    if (match(WHILE)) return whileStatement();
     if (match(LEFT_BRACE)) return new Stmt.Block(block());
 
     return expressionStatement();
@@ -113,6 +118,15 @@ class Parser {
     return new Stmt.Print(value);
   }
 
+  private Stmt whileStatement() {
+    consume(LEFT_PAREN, "Expect '(' after 'while'.");
+    Expr condition = expression();
+    consume(RIGHT_PAREN, "Expect ')' after condition."); 
+
+    Stmt body = statement();
+    return new Stmt.While(condition, body);
+  }
+
   private List<Stmt> block() {
     List statements = new ArrayList<>();
 
@@ -135,7 +149,8 @@ class Parser {
   }
 
   private Expr assignment() {
-    Expr expr = equality();
+    Expr expr = or();
+    // Expr expr = equality();
     if (match(EQUAL)) {
       Token equals = previous();
       Expr value = assignment();
@@ -151,19 +166,43 @@ class Parser {
     return expr;
   }
 
-  // ternary        → equality ( "?" equality ":" equality )? ;
-  private Expr ternary() {
+  private Expr or() {
+    Expr expr = and();
+
+    while(match(OR)) {
+      Token operator = previous();
+      Expr right = and();
+      expr = new Expr.Logical(expr, operator, right);
+    }
+    
+    return expr;
+  }
+
+  private Expr and() {
     Expr expr = equality();
 
-    if (match(QUESTION)) {
-      Expr second = equality();
-      consume(COLON, "Expect ':' after expression.");
-      Expr third = equality();
-      expr = new Expr.Ternary(expr, second, third);
+    while(match(AND)) {
+      Token operator  = previous();
+      Expr right = equality();
+      expr = new Expr.Logical(expr, operator, right);
     }
 
     return expr;
   }
+
+  // ternary        → equality ( "?" equality ":" equality )? ;
+  // private Expr ternary() {
+  //   Expr expr = equality();
+
+  //   if (match(QUESTION)) {
+  //     Expr second = equality();
+  //     consume(COLON, "Expect ':' after expression.");
+  //     Expr third = equality();
+  //     expr = new Expr.Ternary(expr, second, third);
+  //   }
+
+  //   return expr;
+  // }
 
   // equality       → comparison ( ( "!=" | "==" ) comparison )* ;
   private Expr equality() {
