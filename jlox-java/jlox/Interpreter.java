@@ -58,6 +58,9 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
   @Override
   public Void visitVarStmt(Stmt.Var stmt) {
     Object value = Environment.undefined_var();
+    // set to undefined before evaluating the expression
+    // to prevent accessing a name-conflicting variable from the enclosing scope while evaluating the initializer
+    environment.define(stmt.name.lexeme, value);
     if(stmt.initializer != null) {
       value = evaluate(stmt.initializer);
     }
