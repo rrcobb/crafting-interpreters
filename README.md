@@ -376,6 +376,8 @@ questions:
 
 Possible: if the parser sees just one expression statement, and it's at the end of parsing an expression statement, then it can recover from the error and the expression into an expression statement, then pass it to the interpreter.
 
+Passed a 'loose' option to the parser to get the expressions to pass the parsing without semicolons. Making the intepreter print out the result of expression statements, but only in repl mode, is too much annoying work. Committing all this to ch-8-1 branch and not master.
+
 2 remove initialization to nil, and make runtime access of undefined an error
 3 deal with strange scope program in conflicting_scope.lox
 
