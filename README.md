@@ -401,3 +401,8 @@ It prints 3, and leaves the outer-scoped 'a' with the value 1.
 This sorta makes sense, since the lookup happens 'before' the local variable is created. weird, though, because maybe it should be an error for accessing the uninitialized 'a' before it's created. To 'fix' this behavior to raise this error, maybe you have to register the declaration on the lhs, create that 'slot' before you evaluate the expression on the rhs. Solving challenge #2 should help with this.
 
 Solving challenge 2 did indeed help, all that challenge three took was adding a single line to define the variable before evaluating the initializer in `visitVarStmt` in the interpreter.
+
+
+## Chapter 9
+
+Note: Desugaring is another way we could have implemented the parsing for the challenges in chapter 8. e.g. instead of having the parser and intepreter deal with 'looseness', it could construct an 'artificial' print statement.
