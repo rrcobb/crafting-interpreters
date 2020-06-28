@@ -6,9 +6,16 @@ import java.util.Map;
 class Environment {
   private final Map<String, Object> values = new HashMap<>();
   final Environment enclosing;
+  private enum UndefVar {
+    UNDEFINED
+  }
 
   Environment() {
     enclosing = null;
+  }
+
+  static UndefVar undefined_var() {
+    return UndefVar.UNDEFINED;
   }
 
   Environment(Environment enclosing) {
@@ -17,7 +24,12 @@ class Environment {
 
   Object get(Token name) {
     if (values.containsKey(name.lexeme)) {
-      return values.get(name.lexeme);
+      Object val = values.get(name.lexeme);
+      if (val == UndefVar.UNDEFINED) {
+        throw new RuntimeError(name,
+            "Attempt to access unassigned variable '" + name.lexeme + "'.");
+      }
+      return val;
     }
 
     if (enclosing != null) return enclosing.get(name);

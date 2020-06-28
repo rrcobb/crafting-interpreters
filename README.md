@@ -379,6 +379,12 @@ Possible: if the parser sees just one expression statement, and it's at the end 
 Passed a 'loose' option to the parser to get the expressions to pass the parsing without semicolons. Making the intepreter print out the result of expression statements, but only in repl mode, is too much annoying work. Committing all this to ch-8-1 branch and not master.
 
 2 remove initialization to nil, and make runtime access of undefined an error
+
+- Still need a way to define a variable without assignment.
+- So, need to have some kind of signal or marker for undefined variables
+- Can still have 'null' literally, so have to be careful that we're not swallowing a 'real' null
+- set up a single-member enum, initialized the value to that, handled it in the variable 'get' logic in environment.
+
 3 deal with strange scope program in conflicting_scope.lox
 
 > What does the following program do?
@@ -393,4 +399,3 @@ Passed a 'loose' option to the parser to get the expressions to pass the parsing
 It prints 3, and leaves the outer-scoped 'a' with the value 1.
 
 This sorta makes sense, since the lookup happens 'before' the local variable is created. weird, though, because maybe it should be an error for accessing the uninitialized 'a' before it's created. To 'fix' this behavior to raise this error, maybe you have to register the declaration on the lhs, create that 'slot' before you evaluate the expression on the rhs. Solving challenge #2 should help with this.
-
