@@ -431,3 +431,8 @@ Ideas:
 
 Answer: correct to assume this sucks, it's a lot of changes. Implemented with exceptions in the answer guide, which, eh. Sucks. Wait, couldn't it lead to undefined behavior? E.g. if there's some environment cleanup that needs to happen, and it gets skipped?
 
+## Chapter 10
+
+functions are very cool
+
+Also, it looks like the fibonacci program is wrong right now. Do I have a bug, or is it because of the way that environments are defined?
