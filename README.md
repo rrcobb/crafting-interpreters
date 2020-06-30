@@ -436,3 +436,7 @@ Answer: correct to assume this sucks, it's a lot of changes. Implemented with ex
 functions are very cool
 
 Also, it looks like the fibonacci program is wrong right now. Do I have a bug, or is it because of the way that environments are defined?
+
+`executeBlock` was super messed up... not sure what happened to it, but it was v borked
+
+Bug fixed, unclear exactly how I messed it up that bad. oh well.

@@ -39,14 +39,14 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
   @Override
   public Void visitBlockStmt(Stmt.Block stmt) {
-    executeBlock(stmt.statements, this.environment);
+    executeBlock(stmt.statements, new Environment(environment));
     return null;
   }
 
   void executeBlock(List<Stmt> statements, Environment environment) {
-    Environment previous = environment;
+    Environment previous = this.environment;
     try {
-      this.environment = new Environment(previous);
+      this.environment = environment;
 
       for (Stmt statement : statements) {
         execute(statement);
@@ -100,10 +100,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
   @Override
   public Void visitVarStmt(Stmt.Var stmt) {
-    Object value = Environment.undefined_var();
-    // set to undefined before evaluating the expression
-    // to prevent accessing a name-conflicting variable from the enclosing scope while evaluating the initializer
-    environment.define(stmt.name.lexeme, value);
+    Object value = null;
     if(stmt.initializer != null) {
       value = evaluate(stmt.initializer);
     }
@@ -226,7 +223,8 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     List<Object> arguments = new ArrayList<>();
     for (Expr argument : expr.arguments) { 
-      arguments.add(evaluate(argument));
+      Object arg = evaluate(argument);
+      arguments.add(arg);
     }
 
     if (!(callee instanceof LoxCallable)) {

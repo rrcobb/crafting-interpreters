@@ -213,7 +213,7 @@ class Parser {
   }
 
   private List<Stmt> block() {
-    List statements = new ArrayList<>();
+    List<Stmt> statements = new ArrayList<>();
 
     while(!check(RIGHT_BRACE) && !isAtEnd()) {
       statements.add(declaration());
