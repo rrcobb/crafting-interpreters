@@ -440,3 +440,69 @@ Also, it looks like the fibonacci program is wrong right now. Do I have a bug, o
 `executeBlock` was super messed up... not sure what happened to it, but it was v borked
 
 Bug fixed, unclear exactly how I messed it up that bad. oh well.
+
+### Chapter 10 Challenges
+
+1. Our interpreter carefully checks that the number of arguments passed to a function matches the number of parameters it expects. Since this check is done at runtime on every call, it has a real performance cost. Smalltalk implementations don’t have that problem. Why not?
+
+Hmm, maybe I need to learn smalltalk :|. My guess: method calls are messages sent to functions, so arity isn't a runtime check?
+
+Smalltalk has different call syntax for different arities. To define a method that takes multiple arguments, you use keyword selectors. Each argument has a piece of the method name preceding instead of using commas as a separator. For example, a method like:
+
+```
+list.insert("element", 2)
+To insert "element" as index 2 would look like this in Smalltalk:
+```
+
+```
+list insert: "element" at: 2
+```
+
+Smalltalk doesn't use a dot to separate method name from receiver. More interestingly, the "insert:" and "at:" parts both form a single method call whose full name is "insert:at:". Since the selectors and the colons that separate them form part of the method's name, there's no way to call it with the wrong number of arguments. You can't pass too many or two few arguments to "insert:at:" because there would be no way to write that call while still actually naming that method.
+
+Answer: 
+
+2. Lox’s function declaration syntax performs two independent operations. It creates a function and also binds it to a name. This improves usability for the common case where you do want to associate a name with the function. But in functional-styled code, you often want to create a function to immediately pass it to some other function or return it. In that case, it doesn’t need a name.
+
+Languages that encourage a functional style usually support “anonymous functions” or “lambdas”—an expression syntax that creates a function without binding it to a name. Add anonymous function syntax to Lox so that this works:
+
+```
+fun thrice(fn) {
+  for (var i = 1; i <= 3; i = i + 1) {
+    fn(i);
+  }
+}
+
+thrice(fun (a) {
+  print a;
+});
+// "1".
+// "2".
+// "3".
+```
+
+How do you handle the tricky case of an anonymous function expression occurring in an expression statement:
+
+```
+fun () {};
+```
+
+Guess: Instead of the environment definition part of visitFunctionStatement, we want to have a visitfunExpr that just evaluates to a function expression. (not doing this, because I'm a little bored). So, add a new expr to GenerateAst.java, add it to the grammar (hmm) add it to the parser, and evaluation creates a LoxFunction, which can be stored or called. I _think_ you can just ignore anonymous function expressions that occur in an expression statement, since they don't get used, but that's an optimization. Is it hard to parse for some reason? Maybe because it gets picked up by the function statement parser, so it'll error. That is maybe 'right', but if this is to be treated as legit (which I guess it should be) then the grammar really treats the fn name as optional.
+
+3. Is this program valid?
+
+```
+fun scope(a) {
+  var a = "local";
+}
+```
+
+In other words, are a function’s parameters in the same scope as its local variables, or in an outer scope? What does Lox do? What about other languages you are familiar with? What do you think a language should do?
+
+Guess: right now, it's valid, and lox just overwrites it. That seems okay - it's what javascript does, and it is used to e.g. add default values. It's maybe a little bit of a footgun, but not the worst. Immutable variables would probably make this an illegal name collision.
+
+## Chapter 11
+
+The chapter starts off with an example `showA`, which... doesn't fail as it should given my version of jlox! I think this is probably a bug in my implementation of blocks or environments, but I can't tell.
+
+Problem was, I didn't implement all the code in the functions chapter, specifically, missed the bit about closures. :/

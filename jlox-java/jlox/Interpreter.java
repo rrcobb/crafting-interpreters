@@ -39,7 +39,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
   @Override
   public Void visitBlockStmt(Stmt.Block stmt) {
-    executeBlock(stmt.statements, new Environment(environment));
+    executeBlock(stmt.statements, new Environment(this.environment));
     return null;
   }
 
@@ -47,11 +47,13 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     Environment previous = this.environment;
     try {
       this.environment = environment;
+      // System.out.println("moving from" + previous.s() + " to " + environment.s());
 
       for (Stmt statement : statements) {
         execute(statement);
       }
     } finally {
+      // System.out.println("moving back to " + previous.s());
       this.environment = previous;
     }
   }
@@ -68,7 +70,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
   @Override
   public Void visitFunctionStmt(Stmt.Function stmt) {
-    LoxFunction function = new LoxFunction(stmt);
+    LoxFunction function = new LoxFunction(stmt, environment);
     environment.define(stmt.name.lexeme, function);
     return null;
   }

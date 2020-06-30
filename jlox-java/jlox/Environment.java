@@ -16,8 +16,10 @@ class Environment {
   }
 
   Object get(Token name) {
+    // System.out.println("get " + name.lexeme + "from " + s());
     if (values.containsKey(name.lexeme)) {
       Object val = values.get(name.lexeme);
+      // System.out.println("got " + val);
       return val;
     }
 
@@ -44,5 +46,9 @@ class Environment {
 
     throw new RuntimeError(name,
         "Undefined variable '"+ name.lexeme + "'.");
+  }
+
+  public String s() {
+    return values.toString();
   }
 }
