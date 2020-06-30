@@ -406,3 +406,28 @@ Solving challenge 2 did indeed help, all that challenge three took was adding a 
 ## Chapter 9
 
 Note: Desugaring is another way we could have implemented the parsing for the challenges in chapter 8. e.g. instead of having the parser and intepreter deal with 'looseness', it could construct an 'artificial' print statement.
+
+### Challenges
+1. A few chapters from now, when Lox supports first-class functions and dynamic dispatch, then we technically won’t need branching statements built into the language. Show how conditional execution can be implemented in terms of those. Name a language that uses this technique for its control flow.
+
+guess: does haskell do this? various lisps? I don't think they have 'if', but instead use the cool match expressions, whcih I assume is what is meant by dynamic dispatch here.
+
+answer: apparently, it's smalltalk, and the 'true' and 'false' functions on a class. So, you send a message to the class with a block to execute, and it knows what to do
+
+2. Likewise, looping can be implemented using those same tools, provided our interpreter supports an important optimization. What is it, and why is it necessary? Name a language that uses this technique for iteration.
+
+recursion, tail call optimization (so it doesn't blow the stack!)
+
+Answer: yes, nailed it. Also, tail call optimization means discarding the old call stack when you have a tail call, so, the more you know.
+
+3. Unlike Lox, most other C-style languages also support break and continue statements inside loops. Add support for break statements.
+
+The syntax is a break keyword followed by a semicolon. It should be a syntax error to have a break statement appear outside of any enclosing loop. At runtime, a break statement causes execution to jump to the end of the nearest enclosing loop and proceeds from there. Note that the break may be nested inside other blocks and if statements that also need to be exited.
+
+woof. okay, so parsing is not that hard, it's just another kind of statement. Interpreting, visitBreakStmt would have to know how to jump out of a loop. hmm. 
+
+Ideas: 
+- add a marker like 'is breaking' and skip other things if it's true, set to true in visit break, set to false at the end of visitWhile
+
+Answer: correct to assume this sucks, it's a lot of changes. Implemented with exceptions in the answer guide, which, eh. Sucks. Wait, couldn't it lead to undefined behavior? E.g. if there's some environment cleanup that needs to happen, and it gets skipped?
+
