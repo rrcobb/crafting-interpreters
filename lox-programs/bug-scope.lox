@@ -10,7 +10,7 @@ var a = "global";
 }
 
 fun scope(a) {
-  var a = "local";
+//  var a = "local";
   print a;
 }
 

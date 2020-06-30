@@ -506,3 +506,36 @@ Guess: right now, it's valid, and lox just overwrites it. That seems okay - it's
 The chapter starts off with an example `showA`, which... doesn't fail as it should given my version of jlox! I think this is probably a bug in my implementation of blocks or environments, but I can't tell.
 
 Problem was, I didn't implement all the code in the functions chapter, specifically, missed the bit about closures. :/
+
+### Challenges
+
+1. Why is it safe to eagerly define the variable bound to a function’s name when other variables must wait until after they are initialized before they can be used?
+
+Guess: function definitions referring to themselves isn't a bug - recursive variable definitions don't work because they can't have a base case.
+
+answer: no, it's because actually starting using the function will happen later, after definition is finished, not right away. It's about timing, not about power.
+
+2. How do other languages you know handle local variables that refer to the same name in their initializer, like:
+
+var a = "outer";
+{
+  var a = a;
+}
+Is it a runtime error? Compile error? Allowed? Do they treat global variables differently? Do you agree with their choices? Justify your answer.
+
+Guess: I don't think I hate this as much as the author, though it does seem like a footgun. Node allows it, ruby doesn't have bare blocks, neither does python. I think this is allowed in Rust, though I should check.
+
+3. Extend the resolver to report an error if a local variable is never used.
+
+- Add to the representation of the scope stack in the resolver whether or not a variable has been referenced
+- mark true when referenced
+- when stack is popped, check that all values are true
+    might be good to change to tokens rather than strings in the Map if so, so that the errors can be helpful.
+
+Answer: enum instead of boolean in the scope map
+
+4. Our resolver calculates which environment the variable is found in, but it’s still looked up by name in that map. A more efficient environment representation would store local variables in an array and look them up by index.
+
+Extend the resolver to associate a unique index for each local variable declared in a scope. When resolving a variable access, look up both the scope the variable is in and its index and store that. In the interpreter, use that to quickly access a variable by its index instead of using a map.
+
+Guess: Fancy! have to track the current count in each scope, which sounds more and more like a full-fledged class. Implementation doesn't seem all that hard, except maybe getAt has a new dependency on the scope? Actually, all the environment `get` and `set` stuff has to be updated to use array indices. Note, this also makes debugging the environment much harder :/
