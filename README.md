@@ -10,6 +10,12 @@ I'm following along with the book, so I'll do the implementations in Java and C.
 
 I'm also practicing Rust, and want to practice my translation skills, so I'll do the Java and C implementations in Rust too.
 
+
+## Status
+
+jlox-java: Finished Chapter 11, Starting Chapter 12
+jlox-rust: Finished Chapter 8, starting chapter 9
+
 ## Challenges
 
 ### introduction
@@ -359,10 +365,7 @@ Fought it hard, but ended up using Rc and RefCell for the environment and the in
 
 DONE Getting a parser error, probably not doing the parsing right (the parser error was using leftparen and rightparen instead of leftbrace and rightbrace, like a bozo)
 
-Interpreter still panics in bad ways, which is the current worst thing
-
-Todo: make the ternary operator work again, fix the grammar to reflect it properly
-Todo: ch. 8 challenges
+Rust version of the interpreter still panics in bad ways, which is the current worst thing
 
 Challenges:
 1 evaluate expressions in the REPL
@@ -539,3 +542,41 @@ Answer: enum instead of boolean in the scope map
 Extend the resolver to associate a unique index for each local variable declared in a scope. When resolving a variable access, look up both the scope the variable is in and its index and store that. In the interpreter, use that to quickly access a variable by its index instead of using a map.
 
 Guess: Fancy! have to track the current count in each scope, which sounds more and more like a full-fledged class. Implementation doesn't seem all that hard, except maybe getAt has a new dependency on the scope? Actually, all the environment `get` and `set` stuff has to be updated to use array indices. Note, this also makes debugging the environment much harder :/
+
+## Chapter 12: Classes
+
+Challenges:
+1. We have methods on instances, but there is no way to define “static” methods that can be called directly on the class object itself. Add support for them. Use a class keyword preceding the method to indicate a static method that hangs off the class object:
+
+```
+class Math {
+  class square(n) {
+    return n * n;
+  }
+}
+
+print Math.square(3); // Prints "9".
+```
+
+You can solve this however you like, but the “metaclasses” used by Smalltalk and Ruby are a particularly elegant approach. Hint: Make LoxClass extend LoxInstance and go from there.
+
+2. Most modern languages support “getters” and “setters”—members on a class that look like field reads and writes but that actually execute user-defined code. Extend Lox to support getter methods. These are declared without a parameter list. The body of the getter is executed when a property with that name is accessed:
+
+```
+class Circle {
+  init(radius) {
+    this.radius = radius;
+  }
+
+  area {
+    return 3.141592653 * this.radius * this.radius;
+  }
+}
+
+var circle = Circle(4);
+print circle.area; // Prints roughly "50.2655".
+```
+
+3. Python and JavaScript allow you to freely access an object’s fields from outside of its own methods. Ruby and Smalltalk encapsulate instance state. Only methods on the class can access the raw fields, and it is up to the class to decide which state is exposed. Most statically typed languages offer modifiers like private and public to control which parts of a class are externally accessible on a per-member basis.
+
+What are the trade-offs between these approaches and why might a language prefer one or the other?
