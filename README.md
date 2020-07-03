@@ -580,3 +580,71 @@ print circle.area; // Prints roughly "50.2655".
 3. Python and JavaScript allow you to freely access an object’s fields from outside of its own methods. Ruby and Smalltalk encapsulate instance state. Only methods on the class can access the raw fields, and it is up to the class to decide which state is exposed. Most statically typed languages offer modifiers like private and public to control which parts of a class are externally accessible on a per-member basis.
 
 What are the trade-offs between these approaches and why might a language prefer one or the other?
+
+
+## Chapter 13
+
+1. Lox only supports single inheritance—a class may have a single superclass and that’s the only way to reuse methods across classes. Other languages have explored a variety of ways to more freely reuse and share capabilities across classes: mixins, traits, multiple inheritance, virtual inheritance, extension methods, etc.
+
+If you were to add some feature along these lines to Lox, which would you pick and why? If you’re feeling courageous (and you should be at this point), go ahead and add it.
+
+Guess:
+
+Multiple inheritance is kind of a bad idea, but mixins is a decent approach. I like ruby's definition-order-as-precedence, but there's still ways it's a footgun. Rust's traits and impls are kinda cool. How would they work in lox? Maybe not well.
+
+2. In Lox, as in most other object-oriented languages, when looking up a method, we start at the bottom of the class hierarchy and work our way up—a subclass’s method is preferred over a superclass’s. In order to get to the superclass method from within an overriding method, you use super.
+
+The language BETA takes the opposite approach. When you call a method, it starts at the top of the class hierarchy and works down. A superclass method wins over a subclass method. In order to get to the subclass method, the superclass method can call inner, which is sort of like the inverse of super. It chains to the next method down the hierarchy.
+
+The superclass method controls when and where the subclass is allowed to refine its behavior. If the superclass method doesn’t call inner at all, then the subclass has no way of overriding or modifying the superclass’s behavior.
+
+Take out Lox’s current overriding and super behavior and replace it with BETA’s semantics. In short:
+
+When calling a method on a class, prefer the method highest on the class’s inheritance chain.
+
+Inside the body of a method, a call to inner looks for a method with the same name in the nearest subclass along the inheritance chain between the class containing the inner and the class of this. If there is no matching method, the inner call does nothing.
+
+For example:
+
+```
+class Doughnut {
+  cook() {
+    print "Fry until golden brown.";
+    inner();
+    print "Place in a nice box.";
+  }
+}
+
+class BostonCream < Doughnut {
+  cook() {
+    print "Pipe full of custard and coat with chocolate.";
+  }
+}
+
+BostonCream().cook();
+This should print:
+
+Fry until golden brown.
+Pipe full of custard and coat with chocolate.
+Place in a nice box.
+```
+
+(Skipping, but it seems straightforward: change the lookup order in findMethod, treat `inner` much the same way that `super` is treated, except that it's easier to resolve. For cases where there is no subclass, or the subclass doesn't implement the refinement, either add in an empty function, skip it - do nothing (in visitInnerExpr).
+
+This seems like a counterintuitive way for inheritance to work, but I guess that's why it's just one niche/unused language where it's the pattern.
+
+3. In the chapter where I introduced Lox, I challenged you to come up with a couple of features you think the language is missing. Now that you know how to build an interpreter, implement one of those features.
+
+- objects are kind of possible with class instances. Making them more like js objects, using a dynamic / calculated property name, would make them pretty versatile.
+- arrays would be nice
+- random would be nice (built like the `clock`)
+- basically, standard library would be cool
+- string interpolation, regex, errors
+
+String interpolation is a funky feature, since it reaches deep into the lexer. Inside of strings are other expressions, interpolation expressions. Then, you have to visit each of those expresions, evaluate them, and stringify them in order to build the interpolated string expression. Neat that languages have this.
+
+# Part 2
+
+## Chapter 14
+
+Bytecode
