@@ -295,6 +295,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
           // instead, the above check should be &&
           // and this should be a normal (String) cast
           // instead of a call to stringify
+          // note: otherwise, there's no way to format strings, which is irritating
           return stringify(left) + stringify(right);
         }
 

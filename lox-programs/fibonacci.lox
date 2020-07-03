@@ -1,20 +1,25 @@
-fun fib(n) {
-  if (n < 2) {
-    return n;
-  } else {
-    return fib(n-1) + fib(n-2);
-  }
-}
+
 
 /* multiline comment, just slashes and stars */
 
-// currently, very poorly balanced
+// let's balance it
+// note: does not support deletion, only add
+// note: not correctly counting the height after rebalancing
 class Node {
   init(key, value) {
     this.key = key;
     this.value = value;
     this.left = nil;
     this.right = nil;
+    this.height = 0;
+  }
+
+  s() { 
+    return ("{ key: " + this.key) +
+      (", value: " + this.value) + 
+      (", left: " + (this.left and this.left.s())) +
+      (", right: " + (this.right and this.right.s())) +
+      " }"; 
   }
 
   add(key, value) {
@@ -33,6 +38,95 @@ class Node {
         this.right = Node(key, value);
       }
     }
+    this.reheight();
+    this.rebalance();
+  }
+
+  balance() {
+    return (this.right and this.right.height or -1) - (this.left and this.left.height or -1);
+  }
+
+  rebalance() {
+    var b = this.balance();
+    // four cases:
+    // right, left, rightleft, and leftright
+    if (b > 1) { // right unblanced, need some kind of left rotation
+      if (this.right.balance() > 0) {
+        print this.s();
+        this.rotate_left(); 
+        print "left rotated";
+        print this.s();
+      } else {
+        this.rightleft();
+        print "rightleft";
+      }
+    }
+    if (b < -1) { // left unbalanced, need some kind of right rotation
+      if (this.left.balance() < 0) {
+        this.rotate_right();
+        print "right rotated";
+      } else {
+        this.leftright();
+        print "leftright";
+      }
+    }
+  }
+
+  // rotating by moving values around, modifying this node, and creating new nodes
+  // that way, we don't have to track or modify the parent
+  // I think these rotations are broken
+  rotate_left() {
+    // if there's a left node already, this will drop it!
+    if (this.left != nil) {
+      print "would drop a left";
+      // print this.left.s();
+      // print "from";
+      // print this.s();
+    }
+    var oldLeft = this.left;
+    this.left = Node(this.key, this.value);
+    this.left.left = oldLeft;
+    // this takes on the value and left child of its left child
+    this.key = this.right.key;
+    this.value = this.right.value;
+    this.left = this.right.right;
+  }
+
+  rotate_right() {
+    // this value becomes it's right child
+    // if there's a right node already, this will drop it!
+    if (this.right != nil) {
+      print "would drop a right";
+    }
+    var oldRight = this.right;
+    this.right = Node(this.key, this.value);
+    this.right.right = oldRight;
+    // this takes on the value and left child of its left child
+    this.key = this.left.key;
+    this.value = this.left.value;
+    this.left = this.left.left;
+  }
+
+  leftright() {
+    this.left.rotate_left();
+    this.rotate_right();
+  }
+
+  rightleft() {
+    this.right.rotate_right();
+    this.rotate_left();
+  }
+
+  reheight() {
+   // height is max(left.height || -1, right.height || -1) + 1
+   var lh = this.left and this.left.height or -1;
+   var rh = this.right and this.right.height or -1;
+
+   if(lh > rh) {
+     this.height = lh + 1;
+   } else {
+     this.height = rh + 1;
+   }
   }
 
   get(key) {
@@ -87,7 +181,30 @@ fun memoize(f) {
   return memoized;
 }
 
-var memoized_fib = memoize(fib);
+fun fib(n) {
+  if (n < 2) {
+    return n;
+  } else {
+    return fib(n-1) + fib(n-2);
+  }
+}
+
+var results = Results();
+fun memoized_fib(n) {
+  var stored = results.get(n);
+  if (stored) {
+    return stored;
+  }
+  var calculated;
+  if (n < 2) {
+    calculated = n;
+  } else {
+    calculated = memoized_fib(n-1) + memoized_fib(n-2);
+  }
+  results.store(n, calculated);
+  return calculated;
+}
+
 var num = 30;
 
 fun test_unmemoized() {
