@@ -105,4 +105,5 @@ int main() {
   delete(&a);
 
   printf("\n");
+  return 0;
 }

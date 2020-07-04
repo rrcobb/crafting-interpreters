@@ -1,2 +1,4 @@
 actual-ci
 **.class
+**.o
+**.out
