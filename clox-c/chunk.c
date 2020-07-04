@@ -36,3 +36,18 @@ int addConstant(Chunk* chunk, Value value) {
   return chunk->constants.count - 1;
 }
 
+void writeConstant(Chunk* chunk, Value value, int line) {
+  int constant = addConstant(chunk, value);
+  if (constant < 255) {
+    writeChunk(chunk, OP_CONSTANT, line);
+    writeChunk(chunk, constant, line);
+  } else {
+    writeChunk(chunk, OP_CONSTANT_LONG, line);
+    // OP_CONSTANT_LONG uses 3 bytes for the constant
+    // write the constant's location 'in order'
+    writeChunk(chunk, constant>>16, line);
+    writeChunk(chunk, constant>>8, line);
+    writeChunk(chunk, constant, line);
+  }
+}
+
