@@ -49,6 +49,8 @@ Note: added jlox-java/rebuild.sh later on, which does this + the code-generation
 
 3. Do the same thing for C. To get some practice with pointers, define a doubly-linked list of heap-allocated strings. Write functions to insert, find, and delete items from it. Test them.
 
+Note: these practice files are moved to clox-c/practice
+
 `clox-c/hello.c`
 
 `clang clox-c/hello.c -o clox-c/hello.out`
@@ -60,6 +62,15 @@ Note: added jlox-java/rebuild.sh later on, which does this + the code-generation
 `clang clox-c/dll.c -o clox-c/dll.out`
 
 `./clox-c/dll.out`
+
+
+Build and run clox:
+
+`clang clox-c/*.c -o main.out`
+`./clox-c/main.out`
+
+And if that gets slow, I'll think about learning / using CMake
+
 
 ### A Map of the Territory
 
