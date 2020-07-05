@@ -13,8 +13,10 @@ I'm also practicing Rust, and want to practice my translation skills, so I'll do
 
 ## Status
 
-jlox-java: Finished Chapter 11, Starting Chapter 12
+jlox-java: Finished! Didn't do every challenge, but jlox-java works!
 jlox-rust: Finished Chapter 8, starting chapter 9
+clox-c: Finished chapters 13 and 14, haven't completed the ch 14 challenges
+clox-rust: unstarted. not 100% clear that transliteration will be smooth, but we'll give it a go. Helpfully, rustc is cleverer than clang about modules, so we don't have as much #include dance (though, we'll still have some macros to write!)
 
 ## Challenges
 
