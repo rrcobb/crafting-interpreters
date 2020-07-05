@@ -689,9 +689,11 @@ It adds value to chunk’s constant array and then writes an appropriate instruc
 
 Defining two instructions seems to be the best of both worlds. What sacrifices, if any, does it force on us?
 
-Guess: check the size of the constants array, if it's at max, then switch to writing OP_CONSTANT_LONGs.
+Guess: check the size of the constants array, if it's at max, then switch to writing OP_CONSTANT_LONGs. See branch long_constants for the implementation.
 
 Sacrifice: maintaining a larger instruction set imposes maintenance burden, which reduces ability to optimize code. Easy to make a big ol' bug, easy to accidentally make slowdown-types of mistakes.
+
+Better answers and better C code in the answer guide, author also chose little-endian as opposed to my bigendian choice.
 
 Long const is pretty complicated! bitshifting? crazy! Who wants to keep track of that? _might_ be worth it, but maybe not!
 
@@ -700,3 +702,14 @@ Long const is pretty complicated! bitshifting? crazy! Who wants to keep track of
 Hardcore mode: Implement reallocate() without calling realloc(), malloc(), or free(). You are allowed to call malloc() once, at the beginning of the interpreter’s execution, to allocate a single big block of memory which your reallocate() function has access to. It parcels out blobs of memory from that single region, your own personal heap. It’s your job to define how it does that.
 
 This is an interesting distraction, but a distraction nonetheless, so I won't.
+
+## Chapter 14
+
+Executing instructions in the tiny VM.
+
+Notes:
+- remember in C, #define with a function basically inlines the function, by replacing things that look like the the function call with the literal code. That's _faster_ in many cases, because it removes the indirection and overhead of a function call. It's got pitfalls, so we're using it in the `run()` function in particular.
+- we're also using fairly standard #include and #ifndef/ #define as a once-only header mechanism
+- Also we're starting to do pointer stuff, since we're building the stack. Cool. 
+- It's a little hard to see the whole design space of programming languages, and what other options there are for pieces of this. I guess playing with the pieces once they're working is one way to get that sense, but maybe good to truck through most of the book first is a good idea.
+
