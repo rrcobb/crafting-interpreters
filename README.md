@@ -712,4 +712,32 @@ Notes:
 - we're also using fairly standard #include and #ifndef/ #define as a once-only header mechanism
 - Also we're starting to do pointer stuff, since we're building the stack. Cool. 
 - It's a little hard to see the whole design space of programming languages, and what other options there are for pieces of this. I guess playing with the pieces once they're working is one way to get that sense, but maybe good to truck through most of the book first is a good idea.
+- we're also doing some _funky_ preprocessor stuff. See #define BINARY_OP and the book notes around it.
+- "Even though the arithmetic operators take operands—which are found on the stack—the arithmetic bytecode instructions do not." This is somewhat remarkable - we're turning the language into a stack-calculator, which, I guess I didn't realize was possible.
 
+
+### Challenges
+1. What bytecode instruction sequences would you generate for the following expressions:
+
+1 * 2 + 3
+1 + 2 * 3
+3 - 2 - 1
+1 + 2 * 3 - 4 / -5
+
+(Remember that Lox does not have a syntax for negative number literals, so the -5 is negating the number 5.)
+
+2. If we really wanted a minimal instruction set, we could eliminate either OP_NEGATE or OP_SUBTRACT. Show the bytecode instruction sequence you would generate for:
+
+4 - 3 * -2
+
+First, without using OP_NEGATE. Then, without using OP_SUBTRACT.
+
+Given the above, do you think it makes sense to have both instructions? Why or why not? Are there any other redundant instructions you would consider including?
+
+3. Our VM’s stack has a fixed size, and we don’t check if pushing a value overflows it. This means the wrong series of instructions could cause our interpreter to crash or go into undefined behavior. Avoid that by dynamically growing the stack as needed.
+
+What are the costs and benefits of doing so?
+
+4. To interpret OP_NEGATE, we pop the operand, negate the value, and then push the result. That’s a simple implementation, but it increments and decrements ip unnecessarily, since the stack ends up the same height in the end. It might be faster to simply negate the value in place on the stack and leave ip alone. Try that and see if you can measure a performance difference.
+
+Are there other instructions where you can do a similar optimization?
