@@ -766,6 +766,9 @@ What are the costs and benefits of doing so?
     there's now an implementation-dependent performance hit when we do certain
     operations)
 
+Reused the ValueArray type to achieve, but not cleanly. Bad code in
+947f725bf11c7e96c85f8661eae65ac328056e86, cleaning up so that my mistakes don't
+haunt me forever
 
 4. To interpret OP_NEGATE, we pop the operand, negate the value, and then push the result. That’s a simple implementation, but it increments and decrements ip unnecessarily, since the stack ends up the same height in the end. It might be faster to simply negate the value in place on the stack and leave ip alone. Try that and see if you can measure a performance difference.
 
