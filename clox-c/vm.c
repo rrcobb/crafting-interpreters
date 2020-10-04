@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "memory.h"
 #include "common.h"
 #include "vm.h"
 #include "debug.h"
@@ -7,12 +8,24 @@
 VM vm;
 
 static void resetStack() {
-  vm.stackTop = vm.stack;
+  initValueArray(&vm.stack);
+  vm.size = 0;
+  vm.capacity = 0;
+  vm.stackTop = vm.stack.values;
 }
 
 void push(Value value) {
+  if (vm.capacity < vm.size + 1) {
+    int oldCapacity = vm.capacity;
+    vm.capacity = GROW_CAPACITY(oldCapacity);
+    vm.stack.values=GROW_ARRAY(vm.stack.values, Value,
+        oldCapacity, vm.capacity);
+    vm.stackTop = vm.stack.values + vm.size;
+  }
+
   *vm.stackTop = value;
   vm.stackTop++;
+  vm.size++;
 }
 
 Value pop() {
@@ -42,7 +55,7 @@ static InterpretResult run() {
   for (;;) {
 #ifdef DEBUG_TRACE_EXECUTION
     printf("          ");
-    for (Value* slot = vm.stack; slot < vm.stackTop; slot++) {
+    for (Value* slot = vm.stack.values; slot < vm.stackTop; slot++) {
       printf("[ ");
       printValue(*slot);
       printf(" ]");

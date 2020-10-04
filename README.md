@@ -753,11 +753,19 @@ miss one or the other, not language users - so, whichever is actually faster is
 better. Likely better to support it, though that might be forgetting the lesson
 from RISC.
 
-
-
 3. Our VM’s stack has a fixed size, and we don’t check if pushing a value overflows it. This means the wrong series of instructions could cause our interpreter to crash or go into undefined behavior. Avoid that by dynamically growing the stack as needed.
 
 What are the costs and benefits of doing so?
+
+- nice to grow the stack _some_ since otherwise we can't run big programs
+- stack is an implicit limit on depth of recursion, so infinite recursion gets a
+    stack overflow
+- definitely nice to error instead of crashing or going into undefined behavior
+- cost of dynamic growing is a check on the stack size each time we add something
+    to the stack (plus the complexity + penalty when we resize the stack -
+    there's now an implementation-dependent performance hit when we do certain
+    operations)
+
 
 4. To interpret OP_NEGATE, we pop the operand, negate the value, and then push the result. That’s a simple implementation, but it increments and decrements ip unnecessarily, since the stack ends up the same height in the end. It might be faster to simply negate the value in place on the stack and leave ip alone. Try that and see if you can measure a performance difference.
 
