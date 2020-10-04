@@ -67,10 +67,10 @@ Note: these practice files are moved to clox-c/practice
 
 
 Build and run clox:
-
-`clang clox-c/*.c -o main.out`
-`./clox-c/main.out`
-
+```
+clang clox-c/*.c -o main.out
+./clox-c/main.out
+```
 And if that gets slow, I'll think about learning / using CMake
 
 
@@ -705,7 +705,7 @@ Hardcore mode: Implement reallocate() without calling realloc(), malloc(), or fr
 
 This is an interesting distraction, but a distraction nonetheless, so I won't.
 
-## Chapter 14
+## Chapter 15
 
 Executing instructions in the tiny VM.
 
@@ -728,6 +728,8 @@ Notes:
 
 (Remember that Lox does not have a syntax for negative number literals, so the -5 is negating the number 5.)
 
+A: see main.c at commit 923b1ed20760e2fa7ffcd176f5aefda6e2e99fe6 for solutions
+
 2. If we really wanted a minimal instruction set, we could eliminate either OP_NEGATE or OP_SUBTRACT. Show the bytecode instruction sequence you would generate for:
 
 4 - 3 * -2
@@ -735,6 +737,23 @@ Notes:
 First, without using OP_NEGATE. Then, without using OP_SUBTRACT.
 
 Given the above, do you think it makes sense to have both instructions? Why or why not? Are there any other redundant instructions you would consider including?
+
+
+A: 
+without negate:
+4 - 3 * ( 0 - 2)
+without subtract:
+4 + (-3) * -2
+
+fewer instructions (smaller bytecode) when we support more ops.
+but, the innner loop gets a little longer / more complicated
+that cost we pay again and again. Would need information about programs in order
+to tell which is actually right - it's just a pain for language implementers to
+miss one or the other, not language users - so, whichever is actually faster is
+better. Likely better to support it, though that might be forgetting the lesson
+from RISC.
+
+
 
 3. Our VM’s stack has a fixed size, and we don’t check if pushing a value overflows it. This means the wrong series of instructions could cause our interpreter to crash or go into undefined behavior. Avoid that by dynamically growing the stack as needed.
 
