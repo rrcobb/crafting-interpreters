@@ -738,7 +738,6 @@ First, without using OP_NEGATE. Then, without using OP_SUBTRACT.
 
 Given the above, do you think it makes sense to have both instructions? Why or why not? Are there any other redundant instructions you would consider including?
 
-
 A: 
 without negate:
 4 - 3 * ( 0 - 2)
@@ -746,12 +745,20 @@ without subtract:
 4 + (-3) * -2
 
 fewer instructions (smaller bytecode) when we support more ops.
-but, the innner loop gets a little longer / more complicated
+but, the inner loop gets a little longer / more complicated
 that cost we pay again and again. Would need information about programs in order
 to tell which is actually right - it's just a pain for language implementers to
 miss one or the other, not language users - so, whichever is actually faster is
 better. Likely better to support it, though that might be forgetting the lesson
 from RISC.
+
+From the mouth of the man himself:
+
+> I do think it makes sense to have both instructions. The overhead of dispatching is pretty high, so you want instructions as high level as possible, you want to fill your opcode space, and you want common operations to encode as a single instruction when possible.
+
+> Given how common both negation and subtraction are, and given that we've got plenty of room in our opcode set, it makes perfect sense to have instructions for both.
+
+> I would also consider specialized instructions to load common number constants like zero and one. It might be worth having instructions to increment and decrement a number too.
 
 3. Our VM’s stack has a fixed size, and we don’t check if pushing a value overflows it. This means the wrong series of instructions could cause our interpreter to crash or go into undefined behavior. Avoid that by dynamically growing the stack as needed.
 
@@ -772,4 +779,18 @@ haunt me forever
 
 4. To interpret OP_NEGATE, we pop the operand, negate the value, and then push the result. That’s a simple implementation, but it increments and decrements ip unnecessarily, since the stack ends up the same height in the end. It might be faster to simply negate the value in place on the stack and leave ip alone. Try that and see if you can measure a performance difference.
 
+```
+case OP_NEGATE:   *(vm.stackTop - 1) = -*(vm.stackTop - 1); break;
+```
+
+- I could attempt to measure a perf difference; but I assume it's pretty small
+
 Are there other instructions where you can do a similar optimization?
+
+- We could do more direct work on the stack - add directly to the pointer,
+instead of doing two pops for a binary op. Seems like it wouldn't be much
+faster, but then again, maybe I'm missing something.
+
+## Chapter 16 Scanning On Demand 
+
+
