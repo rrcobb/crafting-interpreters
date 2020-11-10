@@ -793,4 +793,83 @@ faster, but then again, maybe I'm missing something.
 
 ## Chapter 16 Scanning On Demand 
 
+1. Many newer languages support string interpolation. Inside a string literal, you have some sort of special delimiters—most commonly ${ at the beginning and } at the end. Between those delimiters, any expression can appear. When the string literal is executed, the inner expression is evaluated, converted to a string, and then merged with the surrounding string literal.
 
+For example, if Lox supported string interpolation, then this:
+
+```
+var drink = "Tea";
+var steep = 4;
+var cool = 2;
+print "${drink} will be ready in ${steep + cool} minutes.";
+```
+Would print:
+
+`Tea will be ready in 6 minutes.`
+
+What token types would you define to implement a scanner for string interpolation? What sequence of tokens would you emit for the above string literal?
+
+What tokens would you emit for:
+
+`"Nested ${"interpolation?! Are you ${"mad?!"}"}"`
+
+Consider looking at other language implementations that support interpolation to see how they handle it.
+
+HMMMMM.
+
+Seems super hard in clox, but maybe easier in jlox, since we'd have the objects
+point to each other.
+
+Maybe we'd emit something like
+
+STRING
+INTERP
+STRING
+INTERP
+STRING
+
+and they'd encompass each other?
+
+Makes dealing with strings in the compiler much harder, but hey, maybe that's
+the compiler's problem. Overlapping tokens? :|
+
+Alternatively... maybe we manipulate the source, to leave slots more like a fmt
+string?
+
+> author answer 
+
+string before interpolation gets special 'TOKEN_STRING_INTERP', which ends at
+the interpolation start - other tokens get emitted until the end of the
+interpolation. Then the last bit gets a normal 'string' token.
+
+Seems like a reasonable answer, no idea how other langs do it. Tagged template
+literals make it seem like js handles '\`' delimited strings differently.
+
+2. Several languages use angle brackets for generics and also have a >> right shift operator. This led to a classic problem in early versions of C++:
+
+`vector<vector<string>> nestedVectors;`
+
+This would produce a compile error because the >> was lexed to a single right shift token, not two > tokens. Users were forced to avoid this by putting a space between the closing angle brackets.
+
+Later versions of C++ are smarter and can handle the above code. Java and C# never had the problem. How do those languages specify and implement this?
+
+C++ answer:
+http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2005/n1757.html
+
+Apparently the C# and Java specs don't spec this right, and the parsers do hax
+to keep things working - C# by making two > tokens from the bat, and Java by
+treating a >> token as two `>`s if it needs to. Wild.
+
+3. Many languages, especially later in their evolution, define “contextual keywords”. These are identifiers that act like reserved words in some contexts but can be normal user-defined identifiers in others.
+
+For example, await is a keyword inside an async method in C#, but in other methods, you can use await as your own identifier.
+
+Name a few contextual keywords from other languages, and the context where they are meaningful. What are the pros and cons of having contextual keywords? How would you implement them in your language’s front end if you needed to?
+
+`async/await` is the big one here, I guess `case` is sorta contextual inside of
+`switch` too, sorta? idk, they're both reserved, it's a syntax error outside of
+a switch I suppose. Now that I think about it, tons of reserved words only work
+in certain contexts, that's the point of the grammar, duhhhh. Usually those are
+implemented at the scanner level, contextual keywords in this sense are actually
+dealt with in the compiler / interpreter - they get treated as identifiers in
+the interim :o
