@@ -30,6 +30,9 @@ void freeVM() {
 
 // note that given the time spent in this loop, optimization techniques are worth it, well-studied, and abundant. Look up: direct threaded code, jump table, computed goto
 static InterpretResult run() {
+#ifdef DEBUG_TRACE_EXECUTION
+  printf("== run ==\n");
+#endif
 #define READ_BYTE() *(vm.ip++)
 #define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
 

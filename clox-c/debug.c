@@ -36,6 +36,7 @@ static int longConstantInstruction(const char* name, Chunk* chunk,
   printf("'\n");
   return offset + 4;
 }
+
 int disassembleInstruction(Chunk* chunk, int offset) {
   printf("%04d ", offset);
   if (offset > 0 && chunk->lines[offset] == chunk->lines[offset - 1]) {
