@@ -944,3 +944,24 @@ In the full Lox language, what other tokens can be used in both prefix and infix
 Add support for that operator to the compiler. You don’t have to generate any bytecode, just show how you would hook it up to the parser and handle the operands.
 
 Yikes! Gonna skip the mixfix operator, but it seems hard.
+
+### 18: Types of values
+
+1. We could reduce our binary operators even further than we did here. Which other instructions can you eliminate, and how would the compiler cope with their absence?
+
+- greater and less than could be collapsed into subtract and equal, at the cost
+    of complexity and more ops
+- like we did before, add and substract can be collapsed into just subtract
+- similarly, I think multiply can be collapsed into divide
+
+A: negate and subtract are redundant
+
+2. Conversely, we can improve the speed of our bytecode VM by adding more specific instructions that correspond to higher-level operations. What instructions would you define to speed up the kind of user code we added support for in this chapter?
+
+- The binary operators we left out (bang equal, greater equal, less equal)
+
+A: 
+- small integer constant loads
+- incrementing and decrementing by one
+- doubling
+- comparison with zero (maybe also true / false?)
