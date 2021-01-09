@@ -873,3 +873,74 @@ in certain contexts, that's the point of the grammar, duhhhh. Usually those are
 implemented at the scanner level, contextual keywords in this sense are actually
 dealt with in the compiler / interpreter - they get treated as identifiers in
 the interim :o
+
+### ch 17 challenges
+
+1.  (-1 + 2) * 3 - -4
+
+> Write a trace of how those functions are called. Show the order they are called, which calls which, and the arguments passed to them.
+
+- compile (called by interpret, called by repl in main.c)
+  - given a blank chunk and the source, inits a scanner for the source
+  - advances once, over the '('
+- calls expression() with no args
+  - calls parsePrecedence with PREC_ASSIGNMENT
+  - advances over the `-`
+  - gets the prefixrule for `(` (since that's previous)
+  - prefixrule is 'grouping'
+  - calls grouping
+    - calls expression
+    - calls parsePrecedence with PREC_ASSIGNMENT
+        - advances over the `1`
+        - gets prefix rule for `-` (unary)
+        - calls `unary`
+          - calls parsePrecedence with PREC_UNARY
+          - advances over the `+`
+          - gets 'number' as the prefix rule
+          - calls `number`
+            - emits a constant 
+          - PREC_UNARY is more than the precedence of `+` (PREC_TERM) so we skip
+              the loop
+          - emits the op_negate byte
+      - PREC_ASSIGNMENT is lower than PREC_TERM of `+`
+        - so we enter the while loop and advance to `2`
+        - pull the infixRule from `+`, which is `binary`
+        - and call binary()
+          - we call parsePrecedence with PREC_TERM + 1, which I guess is
+              PREC_FACTOR
+              - advance takes us over `(`
+              - number() prefix rule
+                - just emits the constant 2
+              - token right paren has PREC_NONE, which is less than PREC_FACTOR,
+                  so we skip the while loop
+          - then we emit an OPP_ADD
+    - consumes the right token, which advances to `*`
+  - PREC_ASSIGNMENT is less than PREC_FACTOR from the token_star lookup in the
+      table, so we enter the while loop
+      - advance to the 3
+      - get the infixRule from `*`, binary, call it
+        - calls parsePrecedence with PREC_FACTOR + 1, PREC_UNARY
+            - advances over the `-`
+            - gets the prefix rule for `3`, which is number
+              - calls it, adds constant op
+            - PREC_FACTOR is more than PREC_TERM, which is the precedence of the
+                `-`, so we skip the while loop
+        - then adds the OP_MULTIPLY
+  - PREC_ASSIGNMENT is less than PREC_TERM, so we run the while loop again
+    - advance over the second `-`
+    - get the prefix rule for `-`, which is 
+... and so on
+
+
+2. The ParseRule row for TOKEN_MINUS has both prefix and infix function pointers. That’s because - is both a prefix operator (unary negation) and an infix one (subtraction).
+
+In the full Lox language, what other tokens can be used in both prefix and infix positions? What about in C or another language of your choice?
+- the minus operator
+- (I struggled, but the left paren is apparently the other)
+- in other languages, there's a '+' prefix operator
+
+3. You might be wondering about complex “mixfix” expressions that have more than two operands separated by tokens. C’s conditional or “ternary” operator, ?: is a widely-known one.
+
+Add support for that operator to the compiler. You don’t have to generate any bytecode, just show how you would hook it up to the parser and handle the operands.
+
+Yikes! Gonna skip the mixfix operator, but it seems hard.

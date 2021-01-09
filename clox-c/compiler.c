@@ -174,6 +174,7 @@ static void unary() {
   }
 }
 
+//                        prefix    infix    precedence
 ParseRule rules[] = {
   [TOKEN_LEFT_PAREN]    = {grouping, NULL,   PREC_NONE},
   [TOKEN_RIGHT_PAREN]   = {NULL,     NULL,   PREC_NONE},
