@@ -1,10 +1,13 @@
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
 
-#include "common.h"
-#include "vm.h"
-#include "compiler.h"
 #include "debug.h"
+#include "object.h"
+#include "memory.h"
+#include "vm.h"
+#include "common.h"
+#include "compiler.h"
 
 VM vm;
 
@@ -44,11 +47,27 @@ static bool isFalsey(Value value) {
   return IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value));
 }
 
+static void concatenate() {
+  ObjString* b = AS_STRING(pop());
+  ObjString* a = AS_STRING(pop());
+
+  int length = a->length + b->length;
+  char* chars = ALLOCATE(char, length + 1);
+  memcpy(chars, a->chars, a->length);
+  memcpy(chars + a->length, b->chars, b->length);
+  chars[length] = '\0';
+
+  ObjString* result = takeString(chars, length);
+  push(OBJ_VAL(result));
+}
+
 void initVM() {
   resetStack();
+  vm.objects = NULL;
 }
 
 void freeVM() {
+  freeObjects();
 }
 
 // note that given the time spent in this loop, optimization techniques are worth it, well-studied, and abundant. Look up: direct threaded code, jump table, computed goto
@@ -100,7 +119,20 @@ static InterpretResult run() {
       }
       case OP_GREATER:  BINARY_OP(BOOL_VAL, >); break;
       case OP_LESS:     BINARY_OP(BOOL_VAL, <); break;
-      case OP_ADD:      BINARY_OP(NUMBER_VAL, +); break;
+      case OP_ADD: {
+        if (IS_STRING(peek(0)) && IS_STRING(peek(1))) {
+          concatenate();
+        } else if (IS_NUMBER(peek(0)) && IS_NUMBER(peek(1))) {
+          double b = AS_NUMBER(pop());
+          double a = AS_NUMBER(pop());
+          push(NUMBER_VAL(a + b));
+        } else {
+          runtimeError(
+              "Operands must be two numbers or two strings.");
+          return INTERPRET_RUNTIME_ERROR;
+        }
+        break;
+      }
       case OP_SUBTRACT: BINARY_OP(NUMBER_VAL, -); break;
       case OP_MULTIPLY: BINARY_OP(NUMBER_VAL, *); break;
       case OP_DIVIDE:   BINARY_OP(NUMBER_VAL, /); break;
