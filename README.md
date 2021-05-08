@@ -13,10 +13,10 @@ I'm also practicing Rust, and want to practice my translation skills, so I'll do
 
 ## Status
 
-jlox-java: Finished! Didn't do every challenge, but jlox-java works!
-jlox-rust: Finished Chapter 8, starting chapter 9
-clox-c: Finished chapters 13 and 14, haven't completed the ch 14 challenges
-clox-rust: unstarted. not 100% clear that transliteration will be smooth, but we'll give it a go. Helpfully, rustc is cleverer than clang about modules, so we don't have as much #include dance (though, we'll still have some macros to write!)
+- jlox-java: Finished! Didn't do every challenge, but jlox-java works!
+- jlox-rust: Finished Chapter 8, starting chapter 9
+- clox-c: finished chapter 22 on locals, haven't completed all the challenges
+- clox-rust: unstarted. not 100% clear that transliteration will be smooth, but we'll give it a go. Helpfully, rustc is cleverer than clang about modules, so we don't have as much #include dance (though, we'll still have some macros to write!)
 
 ## Challenges
 
@@ -965,3 +965,53 @@ A:
 - incrementing and decrementing by one
 - doubling
 - comparison with zero (maybe also true / false?)
+
+### 19: Strings
+
+### 20: Hash Tables
+
+### 21: Global Variables
+
+### 22: Local Variables
+
+1. Our simple local array makes it easy to calculate the stack slot of each local variable. But it means that when the compiler resolves a reference to a variable, we have to do a linear scan through the array.
+
+Come up with something more efficient. Do you think the additional complexity is worth it?
+
+- We could keep a map
+- Probably not worth it in our little C implementation, because it's a huge PITA
+- and it's at compile time, not runtime, so it doesn't *matter* as much
+- but, in a language with easy maps (like we had in jlox) it's pretty nice to
+    use them
+
+
+2. How do other languages handle code like this:
+
+```
+var a = a;
+```
+
+What would you do if it was your language? Why?
+
+- often, resolve to an outer-scoped version of that variable
+- so I'd probably do that, since it's what people are accustomed to
+- but, idunno, shadowing isn't all that great
+
+3. Many languages make a distinction between variables that can be reassigned and those that can’t. In Java, the final modifier prevents you from assigning to a variable. In JavaScript, a variable declared with let can be assigned, but one declared using const can’t. Swift treats let as single-assignment and uses var for assignable variables. Scala and Kotlin use val and var.
+
+Pick a keyword for a single-assignment variable form to add to Lox. Justify your choice, then implement it. An attempt to assign to a variable declared using your new keyword should cause a compile error.
+
+- name "const" implies no more reassignment
+- though, it may imply constancy, which for mutable objects is bad
+- maybe "once" or "invar" like 'invariable'
+
+Implementation: bool in the local / global struct? a whole new type? Probably
+mark it in the struct, though I forget how globals are represented, so it'd be
+annoying there.
+
+4. Extend clox to allow more than 256 local variables to be in scope at a time.
+
+number of locals is fixed by the UINT8_COUNT in the array in the Compiler
+struct. But also, I think we're keeping a uint8 to index into that array? would
+have to bump up the sizes of all those, or something.
+
