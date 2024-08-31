@@ -1,7 +1,6 @@
 # Reading 'Crafting Interpreters'
 
 Bob Nystrom's http://craftinginterpreters.com/
-
 Notes will go here in this Readme until I need more pages for clarity
 
 ## Languages
@@ -17,6 +16,24 @@ I'm also practicing Rust, and want to practice my translation skills, so I'll do
 - jlox-rust: Finished Chapter 8, starting chapter 9
 - clox-c: finished chapter 22 on locals, haven't completed all the challenges
 - clox-rust: unstarted. not 100% clear that transliteration will be smooth, but we'll give it a go. Helpfully, rustc is cleverer than clang about modules, so we don't have as much #include dance (though, we'll still have some macros to write!)
+
+### jlox-java
+
+```sh
+./jlox-java/rebuild.sh
+```
+
+### jlox-rust
+
+```sh
+Cargo run
+```
+
+### clox-c
+
+```sh
+clang -o main.out *.c && ./main.out
+```
 
 ## Challenges
 
@@ -974,6 +991,8 @@ A:
 
 ### 22: Local Variables
 
+TODO: Implement the optimization for OP_POPN, mentioned at the 22.4 heading.
+
 1. Our simple local array makes it easy to calculate the stack slot of each local variable. But it means that when the compiler resolves a reference to a variable, we have to do a linear scan through the array.
 
 Come up with something more efficient. Do you think the additional complexity is worth it?
@@ -983,6 +1002,7 @@ Come up with something more efficient. Do you think the additional complexity is
 - and it's at compile time, not runtime, so it doesn't *matter* as much
 - but, in a language with easy maps (like we had in jlox) it's pretty nice to
     use them
+- key question: how large is our array likely to get? In lox programs, we can't have more than 256 locals, so it is moot. In other langs (or if we had larger programs), there could be a lot of named things. Compilation is already linear in program length, but this would make that particularly painful.
 
 
 2. How do other languages handle code like this:
@@ -1013,5 +1033,11 @@ annoying there.
 
 number of locals is fixed by the UINT8_COUNT in the array in the Compiler
 struct. But also, I think we're keeping a uint8 to index into that array? would
-have to bump up the sizes of all those, or something.
+have to bump up the sizes of all those, or something (e.g. replace the array with something else).
+
+### 23: Jumping Back and Forth
+
+
+
+
 

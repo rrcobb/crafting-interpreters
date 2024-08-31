@@ -1,0 +1,11 @@
+var a = 1;
+if (a > 0) {
+  print("a was more than 0");
+}
+
+var b = 2;
+if (a > b) {
+  print("a was greater than b");
+} else {
+  print("a less than or equal to b");
+}
