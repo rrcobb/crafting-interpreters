@@ -1,0 +1,20 @@
+// basic switch
+switch(10) {
+  case "a": print("a");
+  case 5: print(5);
+  case 10: print("got it! 10");
+  default: print("BAD! default");
+}
+
+// hits the default
+switch(10) {
+  case "a": print("a");
+  case 5: print(5);
+  default: print("default");
+}
+
+// no default case, should fall through
+switch(10) {
+  case "a": print("a");
+  case 5: print(5);
+}
