@@ -1,0 +1,14 @@
+var x = 0;
+for (; x < 2; x = x + 1) {
+  print(x);
+}
+
+for (var i = 0; i < 4; i = i + 1) {
+  print("i");
+  print(i);
+}
+
+for (; x < 4;) {
+  x = x + 1;
+  print(x);
+}
