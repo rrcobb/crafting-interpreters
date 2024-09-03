@@ -551,6 +551,69 @@ static void ifStatement() {
   patchJump(elseJump);
 }
 
+static int switchCase() {
+  // duplicate the top of the stack, so that it's still in place to check on for next case
+  emitByte(OP_DUP);
+  expression(); // evaluate the expression case (expression):
+  consume(TOKEN_COLON, "Expect ':' after case expression.");
+
+  // OP_EQUAL pops two values off the stack and compares them
+  emitByte(OP_EQUAL); // check if it's equal to the switch value
+  // jump if false to the next case statement
+  int caseJump = emitJump(OP_JUMP_IF_FALSE);
+  emitByte(OP_POP); // pop the boolean off the stack, in the continue case
+  // if the expression is equal, then do the thing
+  statement();
+  // emit a jump to the end if we do execute the statement
+  // we have to (unconditionally) jump over all the other cases
+  int endJump = emitJump(OP_JUMP);
+  // OP_JUMP_IF_FALSE looks at the value, and jumps if it's false, to an offset argument
+  patchJump(caseJump); // where to jump? after the statement!
+  // all the end jumps need to be patched to point to the end of the switch statement
+  return endJump;
+}
+
+static void defaultCase() {
+  consume(TOKEN_COLON, "Expect ':' after default.");
+  // should not need to jump over anything here
+  // then execute the default statement
+  statement();
+  // nothing else to do
+}
+
+static void switchStatement() {
+  consume(TOKEN_LEFT_PAREN, "Expect '(' after 'switch'.");
+  expression();
+  consume(TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
+  consume(TOKEN_LEFT_BRACE, "Expect '{' after switch condition.");
+
+  #define MAX_CASES 30
+  int caseJumps[MAX_CASES];
+  
+  // how many cases do we see?
+  int casenum = 0;
+  while (match(TOKEN_CASE)) {
+    caseJumps[casenum] = switchCase();
+    emitByte(OP_POP);
+    casenum++;
+    if (casenum > MAX_CASES) { error("Can only have 30 cases."); break; }
+  }
+
+  // default case
+  if (match(TOKEN_DEFAULT)) {
+    defaultCase();
+  }
+  consume(TOKEN_RIGHT_BRACE, "Expect '}' after switch cases.");
+
+  // have to patch all the end-of-case jumps after the default
+  for (int i = 0; i < casenum; i++) {
+    patchJump(caseJumps[i]);
+  }
+  // finally need to pop the switch value off the stack
+  emitByte(OP_POP);
+}
+
+
 static void printStatement() {
   expression();
   consume(TOKEN_SEMICOLON, "Expect ';' after value.");
@@ -614,6 +677,8 @@ static void statement() {
     forStatement();
   } else if (match(TOKEN_IF)) {
     ifStatement();
+  } else if (match(TOKEN_SWITCH)) {
+    switchStatement();
   } else if (match(TOKEN_WHILE)) {
     whileStatement();
   } else if (match(TOKEN_LEFT_BRACE)) {

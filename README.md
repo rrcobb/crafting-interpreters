@@ -1052,6 +1052,16 @@ To execute a switch statement, first evaluate the parenthesized switch value exp
 
 To keep things simpler, we’re omitting fallthrough and break statements. Each case automatically jumps to the end of the switch statement after its statements are done.
 
+
+- I'm modifying the grammar a little (I think) -- the cases have `statement*`, but I'm justing doing `statement;` instead. I think it's nicer for these to either go in blocks or be just one line, so I'm happier with that restriction than with 'floating multiple cases'.
+- add a bunch of tokens to the scanner and the logic to match them
+- then... do some compiling, and careful thinking about the stack and how the jumps should go
+
+completed! 
+
+The stack management for the jumps and the cases was annoying. There's also a weird thing where I have to keep track of the number of cases and the pointers to all the jumps that need to be patched; it's a bit of a headache and I used a fixed-sized array to hack around it, so the switch statements end up with a max number of cases.
+
+
 2. In jlox, we had a challenge to add support for break statements. This time, let’s do continue:
 
 ```

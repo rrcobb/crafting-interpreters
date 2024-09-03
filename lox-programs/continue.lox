@@ -1,6 +1,7 @@
 // skip evens using continue
-for (var x = 0; x < 11; x = x + 1) {
-  if (x % 2 == 0) {
+for (var x = 0; x < 8; x = x + 1) {
+  // no modulo operator...
+  if (x - 2 == 0 or x - 4 == 0 or x - 6 == 0) {
     continue;
   }
   print(x);
