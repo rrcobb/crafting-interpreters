@@ -45,8 +45,15 @@ typedef struct {
 } Local;
 
 typedef struct {
+  int depth;
+  int startOffset;
+} Loop;
+
+typedef struct {
   Local locals[UINT8_COUNT];
   int localCount;
+  Loop loops[UINT8_COUNT];
+  int loopCount;
   int scopeDepth;
 } Compiler;
 
@@ -173,6 +180,7 @@ static void patchJump(int offset) {
 
 static void initCompiler(Compiler* compiler) {
   compiler->localCount = 0;
+  compiler->loopCount = 0;
   compiler->scopeDepth = 0;
   current = compiler;
 }
@@ -191,6 +199,10 @@ static void beginScope() {
 }
 
 static void endScope() {
+  if (current->scopeDepth == 0) {
+    error("Tried to end scope when not in a scope.");
+    return;
+  }
   current->scopeDepth--;
   
   while (current->localCount > 0 &&
@@ -235,11 +247,29 @@ static void addLocal(Token name) {
     error("Too many local variables in function.");
     return;
   }
-
   
   Local* local = &current->locals[current->localCount++];
   local->name = name;
   local->depth = -1;
+}
+
+static void enterLoop(int startOffset) {
+  if (current->loopCount > UINT8_COUNT) {
+    error("Loops nested too deep.");
+    return;
+  }
+
+  Loop* loop = &current->loops[current->loopCount++];
+  loop->startOffset = startOffset;
+  loop->depth = current->scopeDepth;
+}
+
+static void exitLoop() {
+  if (current->loopCount < 1) {
+    error("Tried to exit loop at the top level; something is wrong.");
+    return;
+  }
+  current->loopCount--;
 }
 
 static void declareVariable() {
@@ -525,6 +555,7 @@ static void forStatement() {
     patchJump(bodyJump);
   }
 
+  enterLoop(loopStart);
   statement();
   emitLoop(loopStart);
 
@@ -533,6 +564,7 @@ static void forStatement() {
     emitByte(OP_POP);
   }
   endScope();
+  exitLoop();
 }
 
 static void ifStatement() {
@@ -561,7 +593,7 @@ static int switchCase() {
   emitByte(OP_EQUAL); // check if it's equal to the switch value
   // jump if false to the next case statement
   int caseJump = emitJump(OP_JUMP_IF_FALSE);
-  emitByte(OP_POP); // pop the boolean off the stack, in the continue case
+  emitByte(OP_POP); // pop the boolean off the stack
   // if the expression is equal, then do the thing
   statement();
   // emit a jump to the end if we do execute the statement
@@ -620,11 +652,47 @@ static void printStatement() {
   emitByte(OP_PRINT);
 }
 
+static void continueStatement() {
+  // check that we are in a loop, error if we are not
+  if (current->loopCount == 0) {
+    error("'continue' is only permittted within a loop.");
+    return;
+  }
+  consume(TOKEN_SEMICOLON, "Expect ';' after continue.");
+
+  // what loop are we in right now?
+  Loop* currentLoop = &current->loops[current->loopCount - 1];
+
+  // 'end' all of the scopes below the narrowest enclosing loop scope
+  // we want to pop the right number of locals, resetting the stack
+  // but leaving the scopes for the compiler to end when it hits '}', so that it can emit the pops there too
+  int toPop = current->scopeDepth;
+  while (toPop > currentLoop->depth) {
+    while (current->localCount > 0 &&
+         current->locals[current->localCount - 1].depth > toPop) {
+      emitByte(OP_POP);
+      current->localCount--;
+    }
+    toPop--;
+  }
+
+  // jump to the narrowest enclosing loop start (or increment clause for a 'for' loop)
+  int continueTarget = currentLoop->startOffset;
+
+  if (continueTarget < 0) {
+    error("Something wrong with continue target, it's less than 0");
+  }
+  emitLoop(continueTarget);
+}
+
 static void whileStatement() {
   int loopStart = currentChunk()->count;
+
   consume(TOKEN_LEFT_PAREN, "Expect '(' after while.");
   expression();
   consume(TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
+
+  enterLoop(loopStart);
 
   int exitJump = emitJump(OP_JUMP_IF_FALSE);
   emitByte(OP_POP);
@@ -633,6 +701,8 @@ static void whileStatement() {
 
   patchJump(exitJump);
   emitByte(OP_POP);
+
+  exitLoop();
 }
 
 static void synchronize() {
@@ -673,6 +743,8 @@ static void declaration() {
 static void statement() {
   if (match(TOKEN_PRINT)) {
     printStatement();
+  } else if (match(TOKEN_CONTINUE)) {
+    continueStatement();
   } else if (match(TOKEN_FOR)) {
     forStatement();
   } else if (match(TOKEN_IF)) {

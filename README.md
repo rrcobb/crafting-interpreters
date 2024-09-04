@@ -1072,6 +1072,25 @@ A continue statement jumps directly to the top of the nearest enclosing loop, sk
 
 Make sure to think about scope. What should happen to local variables declared inside the body of the loop or in blocks nested inside the loop when a continue is executed?
 
+- pretty easy to scan!
+- have to keep track of our nearest enclosing loops while we're compiling, so that the continue can jump to the right place
+- kind of annoying, since our scopes are already a bit annoying. Maybe we can stick the loop starts where we are sticking the scopes? Maybe we keep a fixed-size array and have a maximum depth of loops?
+- when we hit 'continue', what should happen to the scope? Well, I think the iteration variable needs to stay unchanged (we jump to the iteration point). It needs to be one scope 'higher' than the variables declared inside the loop (which all need to be cleared out, we started the loop over again)
+  - if we're in a scope created inside the loop (or some number of nested scopes inside), then we need to be sure to end scopes until we are at the scope depth of the loop start
+
+```c
+// need to maintain: 
+//  - loop start positions for each loop we nest within
+//  - scope depth at each of the enclosing loops
+//  - (if we wanted labeled continue/break): label for each loop
+// these need to go on the compiler, I think; 
+// we can emit the right instructions without keeping any of this on the vm
+// when do we need to pop this loop off the loop stack? (at the end of the loop)
+// when do we start each loop (and with what offsets)?
+```
+
+Doing the scope management with the continues is actually really annoying! We can't endScope properly, since we are in a weird situation where both the continue and the } are supposed to emit the pops. Instead of being able to reuse the endScope function, we copy/paste into the continueStatment, which feels weird, but okay I guess. Reasoning about the scopes here feels very finicky.
+
 3. Control flow constructs have been mostly unchanged since Algol 68. Language evolution since then has focused on making code more declarative and high level, so imperative control flow hasn’t gotten much attention.
 
 For fun, try to invent a useful novel control flow feature for Lox. It can be a refinement of an existing form or something entirely new. In practice, it’s hard to come up with something useful enough at this low expressiveness level to outweigh the cost of forcing a user to learn an unfamiliar notation and behavior, but it’s a good chance to practice your design skills.
@@ -1080,3 +1099,8 @@ For fun, try to invent a useful novel control flow feature for Lox. It can be a 
 - 'match' seems more powerful than switch, since it's value-based and the patterns are helpful / more reliable
 - so, maybe a value-based pattern matching that can do some logic? idk, a bit hard without types
 - but maybe sort of like the regex-based match that python and ruby have?
+- The end of chapter note about GOTO reminded me of the oft-unused but really neat labeled break and continue from JS: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/label#using_a_labeled_continue_with_for_loops
+
+If I were am feeling bolder I would implement that instead of the dumb version of continue that I'm building now.
+
+## 24: Calls and Functions

@@ -1,8 +1,40 @@
-// skip evens using continue
-for (var x = 0; x < 8; x = x + 1) {
-  // no modulo operator...
-  if (x - 2 == 0 or x - 4 == 0 or x - 6 == 0) {
+// continue past small nums
+var x = 0;
+while (x <= 10) {
+  x = x + 1;
+  if (x < 5) {
     continue;
   }
   print(x);
 }
+ 
+// skip evens using continue
+for (var i = 0; i < 8; i = i + 1) {
+  // no modulo operator...
+  if (i - 2 == 0 or i - 4 == 0 or i - 6 == 0) {
+    {{{
+      var a = 100;
+      var b = 90;
+      var d = 1000;
+      continue;
+    }}}
+  }
+  print(i);
+}
+
+// do nested loops still work?
+var x = 0;
+while (x < 50) {
+  var y = 0;
+  while (y < 10) {
+    y = y + 1;
+    while (y < 5) {
+      var c = 10;
+      y = y + 1;
+      continue;
+      c = c + x;
+    }
+  }
+  x = x + y;
+}
+print(x);
