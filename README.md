@@ -1085,3 +1085,36 @@ Notes:
 interesting: can use the C call stack and a linked list instead of an array for storing compiler things; in the previous challenge we stored things in arrays, but didn't necessarily need to (i.e. the loop array could probably have been a linked list?)
 
 - sharing the mutable views into the stack via callframes is neat. It will be painful with Rust, unless I figure out something clever.
+
+#### Challenges
+
+
+1. Reading and writing the ip field is one of the most frequent operations inside the bytecode loop. Right now, we access it through a pointer to the current CallFrame. That requires a pointer indirection which may force the CPU to bypass the cache and hit main memory. That can be a real performance sink.
+
+Ideally, we’d keep the ip in a native CPU register. C doesn’t let us require that without dropping into inline assembly, but we can structure the code to encourage the compiler to make that optimization. If we store the ip directly in a C local variable and mark it register, there’s a good chance the C compiler will accede to our polite request.
+
+This does mean we need to be careful to load and store the local ip back into the correct CallFrame when starting and ending function calls. Implement this optimization. Write a couple of benchmarks and see how it affects the performance. Do you think the extra code complexity is worth it?
+
+--SKIP--
+
+2. Native function calls are fast in part because we don’t validate that the call passes as many arguments as the function expects. We really should, or an incorrect call to a native function without enough arguments could cause the function to read uninitialized memory. Add arity checking.
+
+a. how do we know how many args a native fn takes? well, we can define it when we defineNative or whatever
+b. how do we check it? well, we can add the check into the call, just like for ObjFunction calls
+c. how do we store the arity? same as with ObjFunction probably
+
+3. Right now, there’s no way for a native function to signal a runtime error. In a real implementation, this is something we’d need to support because native functions live in the statically typed world of C but are called from dynamically typed Lox land. If a user, say, tries to pass a string to sqrt(), that native function needs to report a runtime error.
+
+Extend the native function system to support that. How does this capability affect the performance of native calls?
+
+a. how do we do this checking? well... we could check the types of the args like we check the arity, or similar
+b. before we actually call the C function, we check that the arg types are correct, and issue a runtimeError if not
+c. performance of native calls would be slower! we have to do the arg typechecking, which costs some ops
+
+4. Add some more native functions to do things you find useful. Write some programs using those. What did you add? How do they affect the feel of the language and how practical it is?
+
+- reading args and files seems really useful
+- ditto writing files
+- maybe like a generic syscall interface, that can make other syscalls if you want them
+- loading your own native fn / supporting writing interop code seems potentially useful 
+- maybe a builtin for http requests and responses, a la Bun -- what else do you do with scripts?
