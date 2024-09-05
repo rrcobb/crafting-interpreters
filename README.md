@@ -1079,3 +1079,9 @@ Notes:
 - call a function? just set the instruction pointer!
 - but what about arguments and return values?
 - and what about the return address (where to go once the function finishes executing?)
+
+(to solve these, we implement the call stack and use frames)
+
+interesting: can use the C call stack and a linked list instead of an array for storing compiler things; in the previous challenge we stored things in arrays, but didn't necessarily need to (i.e. the loop array could probably have been a linked list?)
+
+

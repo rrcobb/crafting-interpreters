@@ -1,5 +1,12 @@
-fun sayHi(first, last) {
-  print "Hi, " + first + " " + last + "!";
+fun areWeHavingItYet() {
+  print "Yes we are!";
 }
 
-sayHi("Dear", "Reader");
+// no calls yet
+print areWeHavingItYet;
+
+//fun sayHi(first, last) {
+//  print "Hi, " + first + " " + last + "!";
+//}
+//
+//sayHi("Dear", "Reader");
