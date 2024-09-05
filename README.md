@@ -1084,4 +1084,4 @@ Notes:
 
 interesting: can use the C call stack and a linked list instead of an array for storing compiler things; in the previous challenge we stored things in arrays, but didn't necessarily need to (i.e. the loop array could probably have been a linked list?)
 
-
+- sharing the mutable views into the stack via callframes is neat. It will be painful with Rust, unless I figure out something clever.
