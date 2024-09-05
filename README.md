@@ -1118,3 +1118,14 @@ c. performance of native calls would be slower! we have to do the arg typechecki
 - maybe like a generic syscall interface, that can make other syscalls if you want them
 - loading your own native fn / supporting writing interop code seems potentially useful 
 - maybe a builtin for http requests and responses, a la Bun -- what else do you do with scripts?
+
+## 25: Closures
+
+So, in the language itself, using a closure doesn't feel like much -- it 'just happens'. This, despite programming courses taking time aside in order to discuss them explicitly. I wonder -- do the classes discuss them because they have to be implemented so carefully at the language level? Is that an artifact of knowledge on the part of the teachers, or is it because the semantics are confusing to a beginner?
+
+Doing multiple passes seems like an obvious way to do this implementation. Check which variables get closed over, and then you can mark them to be allocated on the heap and associated with the corresponding function. Curious to see what the single-pass version from Lua/Lox looks like!
+
+Closures mean that the ObjFunctions that we allocated in the compile step and only referenced in the vm are not going to work as neatly as before. Functions can be defined dynamically with different values 'inside' -- the closure.
+
+
+

@@ -1,0 +1,36 @@
+// ex. 1
+var x = "global";
+fun outer() {
+  var x = "outer";
+  fun inner() {
+    // should print "outer"
+    print x;
+  }
+  inner();
+}
+outer();
+
+// ex. 2
+fun makeClosure() {
+  var local = "local";
+  fun closure() {
+    print local;
+  }
+  return closure;
+}
+
+var closure = makeClosure();
+closure();
+
+// ex. 3
+fun makeClosure(value) {
+  fun closure() {
+    print value;
+  }
+  return closure;
+}
+
+var doughnut = makeClosure("doughnut");
+var bagel = makeClosure("bagel");
+doughnut();
+bagel();

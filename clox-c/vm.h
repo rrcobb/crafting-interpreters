@@ -9,7 +9,7 @@
 #define STACK_MAX (FRAMES_MAX * UINT8_COUNT)
 
 typedef struct {
-  ObjFunction* function;
+  ObjClosure* closure;
   // Caller stores its own ip here as the return address
   // function will jump back to ip after it's done
   uint8_t* ip; 
