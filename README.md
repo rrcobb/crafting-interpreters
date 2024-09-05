@@ -1070,3 +1070,12 @@ For fun, try to invent a useful novel control flow feature for Lox. It can be a 
 - 'match' seems more powerful than switch, since it's value-based and the patterns are helpful / more reliable
 - so, maybe a value-based pattern matching that can do some logic? idk, a bit hard without types
 - but maybe sort of like the regex-based match that python and ruby have?
+
+### 24: Calls and Functions
+
+Notes:
+- frame pointer is a pointer into the stack, to the start, where all the variable locations are offset
+- we can't calculate the absolute position of all the variable locations at compile time (bc we don't know in advance what the context will be, i.e. what the state of the stack will be ahead of time), but we do know that on a relative basis, i.e. minus the frame pointer.
+- call a function? just set the instruction pointer!
+- but what about arguments and return values?
+- and what about the return address (where to go once the function finishes executing?)
