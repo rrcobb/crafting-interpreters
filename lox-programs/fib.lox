@@ -1,0 +1,11 @@
+// NOTE: unset DEBUG_PRINT_TRACE_EXECUTION to make this not bound on io from tracing
+
+fun fib(n) {
+  if (n < 2) return n;
+  return fib(n - 2) + fib(n - 1);
+}
+
+var start = clock();
+// ~2.3 to 2.7 seconds to calculate fib(34) with unoptimized clox
+print fib(34); 
+print clock() - start;
