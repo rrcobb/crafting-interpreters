@@ -34,3 +34,28 @@ var doughnut = makeClosure("doughnut");
 var bagel = makeClosure("bagel");
 doughnut();
 bagel();
+
+// ex. 4
+fun outer() {
+  var x = "outside";
+  fun inner() {
+    print x;
+  }
+  inner();
+}
+outer();
+
+// ex. 5
+// this happens to work, but only by chance
+// the value has been popped off the stack!
+fun outer() {
+  var x = "last example";
+  fun inner() {
+    print x;
+  }
+
+  return inner;
+}
+
+var closure = outer();
+closure();
