@@ -57,6 +57,10 @@ struct ObjString {
 typedef struct ObjUpvalue {
   Obj obj;
   Value* location;
+  // the value will go here when closed
+  // the location will point here, (cleverly?)
+  Value closed;
+  struct ObjUpvalue* next;// keep a sorted linkedlist of upvalues
 } ObjUpvalue;
 
 typedef struct {
