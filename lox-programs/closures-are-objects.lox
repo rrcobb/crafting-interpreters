@@ -1,0 +1,41 @@
+// objects are a poor man’s closure (and vice versa)
+// x,y vector "objects"
+fun constructor(x, y) {
+  fun instance(func) {
+    return func(x, y);
+  }
+  return instance;
+}
+
+// "accessors"
+fun _x(x, y) { return x; }
+fun x(inst) { return inst(_x); }
+fun _y(x, y) { return y; }
+fun y(inst) { return inst(_y); }
+
+// "addition"
+fun add(a, b) {
+  return constructor(
+    x(a) + x(b),
+    y(a) + y(b)
+  );
+}
+
+// "scaling"
+fun scale(vec, scalar) {
+  return constructor(
+    scalar * x(vec),
+    scalar * y(vec)
+  );
+}
+
+var a_vec = constructor(4,5);
+print("x:"); print(x(a_vec));
+print("y:"); print(y(a_vec));
+
+var b_vec = constructor(10, 10);
+var result = add(a_vec, b_vec);
+print("added:"); print(x(result)); print(y(result));
+
+result = scale(result, 10);
+print("scaled up:"); print(x(result)); print(y(result));

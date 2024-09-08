@@ -1127,5 +1127,32 @@ Doing multiple passes seems like an obvious way to do this implementation. Check
 
 Closures mean that the ObjFunctions that we allocated in the compile step and only referenced in the vm are not going to work as neatly as before. Functions can be defined dynamically with different values 'inside' -- the closure.
 
+#### Challenges
 
+1. Wrapping every ObjFunction in an ObjClosure introduces a level of indirection that has a performance cost. That cost isn’t necessary for functions that do not close over any variables, but it does let the runtime treat all calls uniformly.
+
+Change clox to only wrap functions in ObjClosures that need upvalues. How does the code complexity and performance compare to always wrapping functions? Take care to benchmark programs that do and do not use closures. How should you weight the importance of each benchmark? If one gets slower and one faster, how do you decide what trade-off to make to choose an implementation strategy?
+
+- Gah, I need to set up benchmarking if I want to do this.
+- in larger programs, there are likely to be more cases that use closures
+- the complexity seems a little annoying, so nice to make it simpler
+- the perf: every fn call involves additional pointer lookups for every `OP_CALL`.  
+  - `OP_CALL` already has to do some jumping
+  - the pointer indirection perf hit depends a lot on architecture / cache...
+
+2. Read the design note below. I’ll wait. Now, how do you think Lox should behave? Change the implementation to create a new variable for each loop iteration.
+
+- Reading the design note, I agree it's a bit confusing, but I also don't really want to implement this!
+
+3. A famous koan teaches us that “objects are a poor man’s closure” (and vice versa). Our VM doesn’t support objects yet, but now that we have closures we can approximate them. Using closures, write a Lox program that models two-dimensional vector “objects”. It should:
+
+- Define a “constructor” function to create a new vector with the given x and y coordinates.
+
+- Provide “methods” to access the x and y coordinates of values returned from that constructor.
+
+- Define an addition “method” that adds two vectors and produces a third.
+
+This is cool! lox-programs/closures-are-objects.lox
+
+a little tricky since we don't have any collection types, so things have to be very functional
 
