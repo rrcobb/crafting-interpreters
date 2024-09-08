@@ -1,0 +1,67 @@
+fun linkedlist(val, next) {
+  fun node(apply) {
+    return apply(val, next);
+  }
+  return node;
+}
+
+fun _next(val, next) { return next; }
+fun next(node) { return node(_next); } 
+fun _val(val, next) { return val; }
+fun val(node) { return node(_val); }
+
+var a = linkedlist("string: end", nil);
+var b = next(a); // should be nil
+var c = val(a); // should be string
+print(a);
+print(b);
+print(c);
+
+
+// take a lot of memory, for fun
+// will consume lots of memory before the gc is implemented
+// but then not once gc is cleaning up
+var total = 0;
+for (var i = 0; i < 2000000; i = i + 1) {
+  var _a = "a string";
+  var _b = "another string";
+  var _c = "a third string, but, this time, considerably longer, so it consumes more memory.
+
+  It has the full text of the Gettysburg Address:
+
+  Four score and seven years ago, our fathers brought forth on this continent a new nation, conceived
+  in Liberty, and dedicated to the proposition that all men are created equal. 
+
+  Now we are engaged in a great civil war, testing whether that nation, or any nation so conceived and so dedicated,
+  can long endure. We are met on a great battlefield of that war. We have come to dedicate a portion of that field
+  as a final resting place for those who here gave their lives that the nation might live. It is altogether fitting and 
+  proper that we should do this.
+
+  But, in a larger sense, we can not dedicate, we cannot consecrate, we cannot hallow, this ground.
+
+  The brave men, living and dead, who struggled here, have consecrated it, far above our poor power to add or detract.
+  The world will little note, nor long remember what we say here, but it can never forget what they did here. It is for
+  us the living, rather, to be dedicated here to the unfinished work which they who fought here have thus far so 
+  nobly advanced. It is rather for us to be here dedicated to the great task remaining before us -- that from 
+  these honored dead we can take increased devotion to that cause for which they gave the that last full measure of
+  devotion -- that we here highly resolve that these dead shall not have died in vain -- that this nation, under God,
+  shall have a new birth of freedom -- and that government of the people, by the people, for the people, shall not perish
+  from this earth.";
+  fun captures() {
+    var uses = (_a + _b) + _c;
+  }
+  total = total + i;
+}
+
+print(total);
+
+// build a linkedlist with lots of nodes
+var head = a;
+for (var i = 0; i < 20000; i = i + 1) {
+  head = linkedlist(i, head);
+}
+// pop them all off
+while (next(head)) {
+  head = next(head);
+}
+print(head);

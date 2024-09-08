@@ -1156,3 +1156,21 @@ This is cool! lox-programs/closures-are-objects.lox
 
 a little tricky since we don't have any collection types, so things have to be very functional
 
+## 26: Garbage Collection
+
+Exciting! Reachability / liveness analysis. If it's a root or can be reached from a root, it's alive!
+
+Naive GC algorithm: traverse from roots, find all live things, free everything else. Mark-Sweep does this in two passes.
+
+do we have a sample program that takes a lot of memory, to benchmark against? let's try.  
+- lox-programs/memory-hog.lox
+- and to bench it, `memory_profile ./main.out lox-programs/memory-hog.lox`
+
+```sh
+memory_profile() {
+    /usr/bin/time -l "$@" 2>&1 >/dev/null | awk '
+        /maximum resident set size/ {printf "Peak RSS: %.2f MB\n", $1/1024/1024}
+        /peak memory footprint/ {printf "Peak VM: %.2f MB\n", $1/1024/1024}
+    '
+}
+```
