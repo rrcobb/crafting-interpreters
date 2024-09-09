@@ -1166,6 +1166,13 @@ do we have a sample program that takes a lot of memory, to benchmark against? le
 - lox-programs/memory-hog.lox
 - and to bench it, `memory_profile ./main.out lox-programs/memory-hog.lox`
 
+Results:
+
+- Before garbage collector: 431.62 MB peak memory usage
+- After garbage collector: 2.90 MB
+
+Pretty big difference!
+
 Conceptually, we are keeping a tricolor list as we GC. We implement this with a worklist, which is more or less the frontier of the graph traversal, where we've noticed the nodes but haven't yet processed them. We'll need some way to check if they've been 'seen', and then add and kick things to/from the worklist, and when it's empty, we're done.
 
 - mark and sweep is conceptually simple, the trick is making sure to get all the details right
@@ -1175,3 +1182,53 @@ When to run GC? Tradeoff: bigger, less frequent runs or smaller, more frequent r
 - GC tuning is a whole arcane art
 - this book doesn't have great answers
 - so, it uses a reasonable guess: fewer GC runs when the heap is bigger
+
+
+#### Challenges
+
+1. The Obj header struct at the top of each object now has three fields: type, isMarked, and next. How much memory do those take up (on your machine)? Can you come up with something more compact? Is there a runtime cost to doing so?
+
+A: the type enum and marked bool could be compacted, at the runtime cost of a bitmask. I don't think the pointer should get compacted in. A bool is a byte uncompacted. One byte per object doesn't seem like too high a cost vs. the bitmask, but it's a little hard to tell without benching.
+
+2. When the sweep phase traverses a live object, it clears the isMarked field to prepare it for the next collection cycle. Can you come up with a more efficient approach?
+
+A: in theory, we could try to unmark things whenever they leave the roots or (potentially) if they are no longer pointed to by some other object. Refcounting is at least one way to do it, but maybe it's possible to still mark/sweep but maintaining the marks on lots of the objects and 'unmarking' when they are e.g. removed from roots or something else stops pointing to them. Without the refcounts, I think there might be some penalties to this if the object graph is highly connected, otherwise it's probably pretty low cost?
+
+3. Mark-sweep is only one of a variety of garbage collection algorithms out there. Explore those by replacing or augmenting the current collector with another one. Good candidates to consider are reference counting, Cheney’s algorithm, or the Lisp 2 mark-compact algorithm.
+
+Reference counting:
+- reference counting: instead of an isMarked bool field, maintain a counter on each object
+- when objects are initialized, increment their count for incoming pointers (roots, objects pointing in)
+- when objects go out of scope, decrement the count of everything they point to
+- if the count goes to 0, collect the object (and decrement the count of what it pointed to)
+- could get big chains of freed memory all at once, but mostly doesn't need as much work to GC
+
+Cheney's algorithm:
+- stop and copy
+- from space and to space -- old heap and new heap
+- copy over all the live objects, similar to the mark phase of mark and sweep, but copying as you go
+- then, just free the whole old heap
+- the pointer management seems annoying - have to 'forward' the pointers from the from-space to the to-space
+
+Mark-compact:
+- https://en.wikipedia.org/wiki/Mark%E2%80%93compact_algorithm
+- somehow combines mark/sweep with Cheney's algorithm
+- mark the reachable objects first
+- move them to the beginning of the heap
+- compacting the heap reduces heap fragmentation, so should get better cache performance
+- have to relocate the pointers to the objects (wiki describes a 'break table' with relocation records)
+- Lisp 2: After standard marking, the algorithm proceeds in the following three passes: 1) Compute the forwarding location for live objects. Keep track of a free and live pointer and initialize both to the start of heap. If the live pointer points to a live object, update that object's forwarding pointer to the current free pointer and increment the free pointer according to the object's size. Move the live pointer to the next object End when the live pointer reaches the end of heap. 2) Update all pointers. For each live object, update its pointers according to the forwarding pointers of the objects they point to. 3) Move objects. For each live object, move its data to its forwarding location.
+- Compressor algorithm: In a first pass, the mapping is computed for all objects in the heap. In a second pass, each object is moved to its new location (compacted to the beginning of the heap), and all pointers within it are modified according to the relocation map.
+
+Generational GC
+- younger objects tend to live shorter
+- keep track of generations, GC the older generations less frequently
+- in essence, keep two heaps with two GCs, one that runs frequently and one that is less frequent
+- note suggests the types of the GCs is sometimes different too
+
+
+## 27: Classes and Instances
+
+Should be easier, apparently.
+
+
