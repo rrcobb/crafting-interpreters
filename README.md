@@ -1166,11 +1166,12 @@ do we have a sample program that takes a lot of memory, to benchmark against? le
 - lox-programs/memory-hog.lox
 - and to bench it, `memory_profile ./main.out lox-programs/memory-hog.lox`
 
-```sh
-memory_profile() {
-    /usr/bin/time -l "$@" 2>&1 >/dev/null | awk '
-        /maximum resident set size/ {printf "Peak RSS: %.2f MB\n", $1/1024/1024}
-        /peak memory footprint/ {printf "Peak VM: %.2f MB\n", $1/1024/1024}
-    '
-}
-```
+Conceptually, we are keeping a tricolor list as we GC. We implement this with a worklist, which is more or less the frontier of the graph traversal, where we've noticed the nodes but haven't yet processed them. We'll need some way to check if they've been 'seen', and then add and kick things to/from the worklist, and when it's empty, we're done.
+
+- mark and sweep is conceptually simple, the trick is making sure to get all the details right
+- e.g. don't forget the weak refs in the vm.strings hash table
+
+When to run GC? Tradeoff: bigger, less frequent runs or smaller, more frequent runs?
+- GC tuning is a whole arcane art
+- this book doesn't have great answers
+- so, it uses a reasonable guess: fewer GC runs when the heap is bigger
