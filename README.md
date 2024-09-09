@@ -1229,6 +1229,5 @@ Generational GC
 
 ## 27: Classes and Instances
 
-Should be easier, apparently.
-
+Should be easier, apparently. Empty classes, at least, are mostly just boilerplate.
 
