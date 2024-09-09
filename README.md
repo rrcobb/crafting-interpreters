@@ -1231,3 +1231,54 @@ Generational GC
 
 Should be easier, apparently. Empty classes, at least, are mostly just boilerplate.
 
+Instances are also mostly boilerplate, except that getting and setting values requires a bit of thought.
+
+#### Challenges
+
+1. Trying to access a non-existent field on an object immediately aborts the entire VM. The user has no way to recover from this runtime error, nor is there any way to see if a field exists before trying to access it. It’s up to the user to ensure on their own that only valid fields are read.
+
+How do other dynamically typed languages handle missing fields? What do you think Lox should do? Implement your solution.
+
+- Javascript: return an undefined
+- Python: raise (catchable) AttributeError if missing on get
+- Ruby: undefined method (all fields are methods?): could either catch or implement method_missing
+
+what other langs are relevant? idk
+
+- implementing returning a Null is doable, so Lox could be Javascripty
+  - in vm.c, swap the runtimeError with a push(NIL_VAL);
+- Ruby and Python's solutions require implementing userspace error handling, which I don't wanna do
+
+2. Fields are accessed at runtime by their string name. But that name must always appear directly in the source code as an identifier token. A user program cannot imperatively build a string value and then use that as the name of a field. Do you think they should be able to? Devise a language feature that enables that and implement it.
+
+- this is a very basic kind of reflection
+- it can be handy for lots of situations, enables a lot of semi-metaprogramming relatively cheaply
+- it's probably worth it in a dynamic language to be able to do this, if not other reflection
+
+implementation:
+- need an alternative syntax (probably something like the [] index operator; maybe `instance.[constructed string expression]`
+- or maybe it's a total alternative to the dot, just a `[]` accessor
+- when we hit that version, we need to pop the string from the stack instead of reading it from the constants table in the vm case for GET_PROPERTY. hmmm. Maybe just a separate operator? dull, but maybe the way to get it done
+
+3. Conversely, Lox offers no way to remove a field from an instance. You can set a field’s value to nil, but the entry in the hash table is still there. How do other languages handle this? Choose and implement a strategy for Lox.
+
+- python has `delete`
+- js has `delete`
+- ruby has `undef`! (TIL) -- unclear exactly what it's doing
+
+removing a field from an instance, why do it? save memory? Just... don't add the field to the instance. I'm not sure it's a good idea, really
+
+The people want structs
+
+4. Because fields are accessed by name at runtime, working with instance state is slow. It’s technically a constant-time operation—thanks, hash tables—but the constant factors are relatively large. This is a major component of why dynamic languages are slower than statically typed ones.
+
+How do sophisticated implementations of dynamically typed languages cope with and optimize this?
+
+- instead of names, it's compiled (or JITd) into array accesses and objects are 'mini-structs'
+- sometimes there's some vtable business going on (ruby!)
+- there's hot path and then there's times when the object doesn't match the expected shape, and code gets deoptimized
+
+
+## 28: Methods and Initializers
+
+Cool, closing in on a really useful language! Let's get there!
