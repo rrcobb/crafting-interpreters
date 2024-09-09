@@ -1,3 +1,4 @@
 class Brioche {}
 print Brioche;
+// with an instance
 print Brioche();

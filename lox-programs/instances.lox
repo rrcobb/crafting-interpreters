@@ -1,0 +1,7 @@
+// classes might not have methods yet
+class Pair {}
+
+var pair = Pair();
+pair.first = 1;
+print pair.second = 2; // 2
+print pair.first + pair.second; // 3.
