@@ -704,15 +704,16 @@ static void classDeclaration() {
     if (identifiersEqual(&className, &parser.previous)) {
       error("A class can't inherit from itself.");
     }
+
+    beginScope();
+    addLocal(syntheticToken("super"));
+    defineVariable(0);
+
     namedVariable(className, false);
     emitByte(OP_INHERIT);
     classCompiler.hasSuperclass = true;
   }
-
-  beginScope();
-  addLocal(syntheticToken("super"));
-  defineVariable(0);
-
+  
   namedVariable(className, false); // put the classname on the stack, for the methods to reference
 
   consume(TOKEN_LEFT_BRACE, "Expect '{' before class body.");
