@@ -1318,3 +1318,6 @@ That is a language choice that affects the performance of our implementation. Wa
 - but... this isn't really the language anyone is reaching for, speed-wise, so maybe the perf penalty is okay. Same with reflection in Ruby etc, I think
 
 ## 29: SuperClasses
+
+- a little fiddling to get things to resolve right. There's some real cleverness in how we've set up the calling convention and our tables, to make these just fall out so easily.
+- nice to have things mostly working!
