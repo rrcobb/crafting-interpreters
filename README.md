@@ -1282,3 +1282,13 @@ How do sophisticated implementations of dynamically typed languages cope with an
 ## 28: Methods and Initializers
 
 Cool, closing in on a really useful language! Let's get there!
+
+- no field declarations, so anything in a class is a method (nice!)
+- creating the methods is similar to creating closures w/ upvalues, in that we'll have dynamic opcodes that do the defining
+  - OP_CLASS for the class
+  - OP_METHOD for each method
+- can't compile methods from strings at runtime, it's always going to be a pointer to bytecode that's in some chunk already
+- the ops ensure that the methods have the right pointers to/from the class, and the names are associated with the pointer to the function, so that the calls can work. It's about the binding, not about the function compilation (w.r.t. these runtime vm ops).
+
+- method access and invokation are separate, functions are first class, so we have to be able to 'fetch' out the method with a dot, separately from calling it
+- there's also a `this` binding that should happen for the instance. hence we 'bind' the methods when we access them so that the instance is there -- it's a new object like a closure with upvalues, except it's a bound method

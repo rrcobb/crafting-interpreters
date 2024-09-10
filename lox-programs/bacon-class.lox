@@ -1,7 +1,8 @@
 class Bacon {
-  eat() {
+  eat(something) {
     print "Crunch crunch crunch!";
+    print something;
   }
 }
 
-Bacon().eat(); // Prints "Crunch crunch crunch!".
+Bacon().eat("an argument"); // Prints "Crunch crunch crunch!\n an argument".
