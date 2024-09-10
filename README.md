@@ -1292,3 +1292,28 @@ Cool, closing in on a really useful language! Let's get there!
 
 - method access and invokation are separate, functions are first class, so we have to be able to 'fetch' out the method with a dot, separately from calling it
 - there's also a `this` binding that should happen for the instance. hence we 'bind' the methods when we access them so that the instance is there -- it's a new object like a closure with upvalues, except it's a bound method
+
+- optimization is neat! we get to skip a heap allocation with the special-cased OP_INVOKE which pre-empts the normal path that would take a GET_PROPERTY and a CALL.
+
+#### Challenges
+
+1. The hash table lookup to find a class’s init() method is constant time, but still fairly slow. Implement something faster. Write a benchmark and measure the performance difference.
+
+- hmm... special case the init method? 
+- keep methods in a different kind of data structure instead of a hashtable (one where init performs especially well)? Maybe just assume that there are few methods in a class, and keep name/pointer tuples in an array, with init first, and check against strings instead of hashtable lookup? If there are just a few methods it'd probably be faster
+
+2. In a dynamically typed language like Lox, a single callsite may invoke a variety of methods on a number of classes throughout a program’s execution. Even so, in practice, most of the time a callsite ends up calling the exact same method on the exact same class for the duration of the run. Most calls are actually not polymorphic even if the language says they can be.
+
+How do advanced language implementations optimize based on that observation?
+
+- A: I'm not sure I understand what this means. a.somemethod() in the source code could be invoking somemethod on different classes? or, sometimes somemethod gets reassigned or something?
+- I assume that instead of setting up dynamic dispatches like this, it could in effect be rewritten to a function, and then maybe inlined in the hot path, but idk. This sounds like JIT stuff to me
+
+3. When interpreting an OP_INVOKE instruction, the VM has to do two hash table lookups. First, it looks for a field that could shadow a method, and only if that fails does it look for a method. The former check is rarely useful—most fields do not contain functions. But it is necessary because the language says fields and methods are accessed using the same syntax, and fields shadow methods.
+
+That is a language choice that affects the performance of our implementation. Was it the right choice? If Lox were your language, what would you do?
+
+- hmm, I think it's a pretty simple mental model right now
+- but, the option is to ban fields with the same name as methods, and throw a compile-time error for them
+- that'd allow the optimization, and _likely_ remove a class of errors from programs (shadowing a method seems usually bad...)
+- but... this isn't really the language anyone is reaching for, speed-wise, so maybe the perf penalty is okay. Same with reflection in Ruby etc, I think
