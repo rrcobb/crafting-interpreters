@@ -224,6 +224,44 @@ static void concatenate() {
   push(OBJ_VAL(result));
 }
 
+int double_to_string(double number, char* str, size_t str_size) {
+    return snprintf(str, str_size, "%.17g", number);
+}
+
+// hasty, likely leaks memory or is just plain broken
+static void concastenate(bool reversed) {
+  Value _a = peek(0);
+  Value _b = peek(1);
+
+  ObjString* a = NULL;
+  ObjString* b = NULL;
+  char str[25];
+  if (!reversed) {
+    a = AS_STRING(_a);
+
+    double b_num = AS_NUMBER(_b);
+    int length = double_to_string(b_num, str, sizeof(str));
+    b = copyString(str, length);
+  } else {
+    b = AS_STRING(_b); 
+
+    double a_num = AS_NUMBER(_a);
+    int length = double_to_string(a_num, str, sizeof(str));
+    a = copyString(str, length);
+  }
+
+  int length = a->length + b->length;
+  char* chars = ALLOCATE(char, length + 1);
+  memcpy(chars, b->chars, b->length);
+  memcpy(chars + b->length, a->chars, a->length);
+  chars[length] = '\0';
+
+  ObjString* result = takeString(chars, length);
+  pop();
+  pop();
+  push(OBJ_VAL(result));
+}
+
 void initVM() {
   resetStack();
   vm.objects = NULL;
@@ -406,6 +444,11 @@ static InterpretResult run() {
                        double b = AS_NUMBER(pop());
                        double a = AS_NUMBER(pop());
                        push(NUMBER_VAL(a + b));
+                     } else if (IS_STRING(peek(0)) && IS_NUMBER(peek(1))) {
+                       // just softly let nums be coerced to strings
+                       concastenate(false);
+                     } else if (IS_NUMBER(peek(0)) && IS_STRING(peek(1))) {
+                       concastenate(true);
                      } else {
                        runtimeError(
                            "Operands must be two numbers or two strings.");

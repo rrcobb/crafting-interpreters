@@ -542,7 +542,6 @@ static void super_(bool canAssign) {
     namedVariable(syntheticToken("super"), false);
     emitBytes(OP_GET_SUPER, name);
   }
-  emitBytes(OP_GET_SUPER, name);
 }
 
 static void this_(bool canAssign) {

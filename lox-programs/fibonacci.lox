@@ -1,8 +1,9 @@
+// This program works, and is interesting for timing
+// but the tree implementation is quite bad
+// like, def doesn't work as intended
+// unclear how it's still correctly working for the memoization fun
+// I guess any memoization is good, even an unbalanced / slow / maybe incorrect tree
 
-
-/* multiline comment, just slashes and stars */
-
-// let's balance it
 // note: does not support deletion, only add
 // note: not correctly counting the height after rebalancing
 class Node {
@@ -14,12 +15,21 @@ class Node {
     this.height = 0;
   }
 
-  s() { 
-    return ("{ key: " + this.key) +
-      (", value: " + this.value) + 
-      (", left: " + (this.left and this.left.s())) +
-      (", right: " + (this.right and this.right.s())) +
-      " }"; 
+  stringlevel(l) {
+    if (l == this.height) {
+      return "(" + this.key + ", " + this.value + ")"; 
+    } else {
+      var s = "";
+      if (this.left) { s = s + this.left.stringlevel(l) + "  "; }
+      if (this.right) { s = s + "  " + this.right.stringlevel(l); }
+      return s;
+    }
+  }
+
+  s() {
+    for (var i = this.height; i >= 0; i = i-1) {
+      print this.stringlevel(i);
+    }
   }
 
   add(key, value) {
@@ -52,10 +62,8 @@ class Node {
     // right, left, rightleft, and leftright
     if (b > 1) { // right unblanced, need some kind of left rotation
       if (this.right.balance() > 0) {
-        print this.s();
         this.rotate_left(); 
         print "left rotated";
-        print this.s();
       } else {
         this.rightleft();
         print "rightleft";
@@ -70,34 +78,24 @@ class Node {
         print "leftright";
       }
     }
+    if (this.left) { this.left.rebalance(); }
+    if (this.right) { this.right.rebalance(); }
   }
 
   // rotating by moving values around, modifying this node, and creating new nodes
   // that way, we don't have to track or modify the parent
   // I think these rotations are broken
   rotate_left() {
-    // if there's a left node already, this will drop it!
-    if (this.left != nil) {
-      print "would drop a left";
-      // print this.left.s();
-      // print "from";
-      // print this.s();
-    }
     var oldLeft = this.left;
     this.left = Node(this.key, this.value);
     this.left.left = oldLeft;
-    // this takes on the value and left child of its left child
+    // this takes on the value and right child of its right child
     this.key = this.right.key;
     this.value = this.right.value;
-    this.left = this.right.right;
+    this.right = this.right.right;
   }
 
   rotate_right() {
-    // this value becomes it's right child
-    // if there's a right node already, this will drop it!
-    if (this.right != nil) {
-      print "would drop a right";
-    }
     var oldRight = this.right;
     this.right = Node(this.key, this.value);
     this.right.right = oldRight;
@@ -117,15 +115,19 @@ class Node {
     this.rotate_left();
   }
 
+  // this should be recursive, I think
+  // height for any node is max(left.height || -1, right.height || -1) + 1
   reheight() {
-   // height is max(left.height || -1, right.height || -1) + 1
+   if (this.left) { this.left.reheight(); }
+   if (this.right) { this.right.reheight(); }
+
    var lh = this.left and this.left.height or -1;
    var rh = this.right and this.right.height or -1;
 
    if(lh > rh) {
      this.height = lh + 1;
    } else {
-     this.height = rh + 1;
+     this.height = rh + 1; // if they're equal, rh is as good as left
    }
   }
 
@@ -160,6 +162,14 @@ class Results {
   get(key) {
     if (this.root) {
       return this.root.get(key);
+    }
+  }
+
+  s() {
+    if (this.root) {
+      this.root.s();
+    } else {
+      print "<empty>";
     }
   }
 }
@@ -217,6 +227,7 @@ fun test_memoized() {
   print "memoized, fib of";
   print num;
   print memoized_fib(num);
+  results.s();
 }
 
 fun time(f) {

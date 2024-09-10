@@ -1321,3 +1321,46 @@ That is a language choice that affects the performance of our implementation. Wa
 
 - a little fiddling to get things to resolve right. There's some real cleverness in how we've set up the calling convention and our tables, to make these just fall out so easily.
 - nice to have things mostly working!
+
+Note: I segfault on lox-programs/degenerate-inheritance.lox. That probably means I fucked up my implementation somehow...
+
+Debugging, because it's good for me.
+
+it was stupid, I was emitting a duplicate OP_GET_SUPER outside of the else clause :facepalm:
+
+#### Challenges
+
+1. A tenet of object-oriented programming is that a class should ensure new objects are in a valid state. In Lox, that means defining an initializer that populates the instance’s fields. Inheritance complicates invariants because the instance must be in a valid state according to all of the classes in the object’s inheritance chain.
+
+The easy part is remembering to call super.init() in each subclass’s init() method. The harder part is fields. There is nothing preventing two classes in the inheritance chain from accidentally claiming the same field name. When this happens, they will step on each other’s fields and possibly leave you with an instance in a broken state.
+
+If Lox was your language, how would you address this, if at all? If you would change the language, implement your change.
+
+- we don't declare the fields in Lox, instead it's a bag of data
+- stomping on superclass fields seems like it's almost guaranteed to happen
+- 'claiming' a field in init could be special-cased, somehow
+- but... what would the semantics be that would be sensible? 
+  - setting the field from the child class seems like it's really useful, like, that's a core thing that child classes should be able to do
+  - I don't see what semantics could make this a better situation? Visibility into the fields of a parent class seems wise.
+
+2. Our copy-down inheritance optimization is valid only because Lox does not permit you to modify a class’s methods after its declaration. This means we don’t have to worry about the copied methods in the subclass getting out of sync with later changes to the superclass.
+
+Other languages, like Ruby, do allow classes to be modified after the fact. How do implementations of languages like that support class modification while keeping method resolution efficient?
+
+- hypothesis: do the update when the class is redefined
+- classes keep track of ancestors and descendants
+- when the 'end' of a class redefinition happens, update the chain of method tables to have the correct function pointers
+- there's probably some bookkeeping about which version of a method you use, like, from which class do you inherit it currently, and how far above you in the tree is it
+- then updates could be fairly reasonable
+
+3. Reverse the inheritance pattern (swap inner for super, highest method in the chain wins)
+
+- guess at the steps:
+  - instead of copying the method table, we have to... do something else... geez
+  - I guess instead of children keeping track of superclasses, parents have to keep track of their (immediate) children
+  - so that the `inner()` invocations can find the right child function
+  - uggg it feels so gross!
+
+## 30: Optimization
+
+
