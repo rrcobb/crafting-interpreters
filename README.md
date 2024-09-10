@@ -1278,7 +1278,6 @@ How do sophisticated implementations of dynamically typed languages cope with an
 - sometimes there's some vtable business going on (ruby!)
 - there's hot path and then there's times when the object doesn't match the expected shape, and code gets deoptimized
 
-
 ## 28: Methods and Initializers
 
 Cool, closing in on a really useful language! Let's get there!
@@ -1317,3 +1316,5 @@ That is a language choice that affects the performance of our implementation. Wa
 - but, the option is to ban fields with the same name as methods, and throw a compile-time error for them
 - that'd allow the optimization, and _likely_ remove a class of errors from programs (shadowing a method seems usually bad...)
 - but... this isn't really the language anyone is reaching for, speed-wise, so maybe the perf penalty is okay. Same with reflection in Ruby etc, I think
+
+## 29: SuperClasses

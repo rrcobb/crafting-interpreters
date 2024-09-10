@@ -381,6 +381,16 @@ static InterpretResult run() {
         push(value); // assignment is an expression, so leave the value on the stack
         break;
       }
+      case OP_GET_SUPER: {
+        ObjString* name = READ_STRING();
+        ObjClass* superclass = AS_CLASS(pop());
+
+        // since the superclass is popped, the instance is at the top of the stack for the bindMethod
+        if (!bindMethod(superclass, name)) {
+          return INTERPRET_RUNTIME_ERROR;
+        }
+        break;
+      }
       case OP_EQUAL: {
                        Value b = pop();
                        Value a = pop();
@@ -479,6 +489,18 @@ static InterpretResult run() {
       case OP_CLASS:
         push(OBJ_VAL(newClass(READ_STRING())));
         break;
+      case OP_INHERIT: {
+                         Value superclass = peek(1);
+                         if (!IS_CLASS(superclass)) {
+                           runtimeError("Superclass must be a class.");
+                           return INTERPRET_RUNTIME_ERROR;
+                         }
+                         ObjClass* subclass = AS_CLASS(peek(0));
+                         tableAddAll(&AS_CLASS(superclass)->methods,
+                             &subclass->methods);
+                         pop(); // pop the subclass
+                         break;
+                       }
       case OP_METHOD:
         defineMethod(READ_STRING());
         break;

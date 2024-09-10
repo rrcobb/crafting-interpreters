@@ -4,6 +4,12 @@ class Doughnut {
   }
 }
 
+class Cruller < Doughnut {
+  finish() {
+    print "Glaze with icing.";
+  }
+}
+
 class BostonCream < Doughnut {
   cook() {
     super.cook();
