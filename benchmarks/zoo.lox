@@ -1,0 +1,44 @@
+class Zoo {
+  init() {
+    this.aardvark = 1;
+    this.baboon   = 1;
+    this.cat      = 1;
+    this.donkey   = 1;
+    this.elephant = 1;
+    this.fox      = 1;
+    this.dog      = 1;
+    this.rabbit   = 1;
+    this.giraffe  = 1;
+    this.hippo    = 1;
+  }
+  ant()    { return this.aardvark; }
+  banana() { return this.baboon; }
+  tuna()   { return this.cat; }
+  hay()    { return this.donkey; }
+  grass()  { return this.elephant; }
+  mouse()  { return this.fox; }
+  pup()    { return this.dog; }
+  bunny()  { return this.rabbit; }
+  neck()  { return this.giraffe; }
+  big()  { return this.hippo; }
+}
+
+var zoo = Zoo();
+var sum = 0;
+print "zoo test, start!";
+var start = clock();
+while (sum < 100000000) {
+  sum = sum + zoo.ant()
+            + zoo.banana()
+            + zoo.tuna()
+            + zoo.hay()
+            + zoo.grass()
+            + zoo.mouse()
+            + zoo.pup()
+            + zoo.bunny()
+            + zoo.neck()
+            + zoo.big();
+}
+
+print clock() - start;
+print sum;

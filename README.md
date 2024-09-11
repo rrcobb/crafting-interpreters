@@ -1363,4 +1363,28 @@ Other languages, like Ruby, do allow classes to be modified after the fact. How 
 
 ## 30: Optimization
 
+- benchmark first
+- then optimize
+- then test
+
+Benchmark 1: Zoo
+- class with lots of fields
+- method for each field access
+- loop to invoke the methods and add up and print all the values
+- expectation: most of the time is spent in the callframe setup stuff; the method invokation is still somewhat expensive
+
+Before optimization, time for sum > 100000000: 12-13s
+- results: OP_GET_GLOBAL(17%), OP_GET_PROPERTY(12%), and big spender OP_INVOKE(42%) of time spent by ops
+- all of these are spending most of their time in... `tableGet()`
+
+This lookup optimization business was asked about in an earlier challenge. I think there are a few ways to go, but maybe using a linear scan through a small array for small tables is still a decent idea.
+
+Looking deeper, there's a mod operation that's somehow very expensive, so we can optimize that. We can bitmask instead of % to wrap the key.
+
+Seems like it improved things a bit (10-11s on my system, down from 12-13) but not a lot. Maybe a different thing is slow for me!
+
+Nan-boxing has a more significant effect (7s or so, down from 10s). 
+
+However, all of this is a bit mooted by a missing piece. I was clanging without optimizing, but passing the -O flags makes things way faster. O1 => 3.5-3.7s or so, O2 => 3.2-3.4s or so, O3 => 3.1-3.4s.
+
 
