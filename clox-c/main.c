@@ -70,6 +70,9 @@ int main(int argc, const char* argv[]) {
     exit(64);
   }
 
+#ifdef DEBUG_TRACK_TABLE
+  printTableStats();
+#endif
+
   return 0;
 }
-

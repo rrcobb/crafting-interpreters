@@ -9,6 +9,7 @@
 #include "vm.h"
 #include "common.h"
 #include "compiler.h"
+#include "table.h"
 
 VM vm;
 
@@ -580,6 +581,10 @@ static InterpretResult run() {
 #undef READ_CONSTANT
 #undef READ_STRING
 #undef BINARY_OP
+
+#ifdef DEBUG_TRACK_TABLE
+  printTableStats();
+#endif
 }
 
 InterpretResult interpret(const char* source) {

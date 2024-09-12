@@ -26,4 +26,7 @@ ObjString* tableFindString(Table* table, const char* chars,
     int length, uint32_t hash);
 void tableRemoveWhite(Table* table);
 void markTable(Table* table);
+#ifdef DEBUG_TRACK_TABLE
+void printTableStats();
+#endif
 #endif
