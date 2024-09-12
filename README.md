@@ -1387,4 +1387,28 @@ Nan-boxing has a more significant effect (7s or so, down from 10s).
 
 However, all of this is a bit mooted by a missing piece. I was clanging without optimizing, but passing the -O flags makes things way faster. O1 => 3.5-3.7s or so, O2 => 3.2-3.4s or so, O3 => 3.1-3.4s.
 
+#### Challenges
 
+1. Fire up your profiler, run a couple of benchmarks, and look for other hotspots in the VM. Do you see anything in the runtime that you can improve?
+
+- 'fire up your profiler' - ugh, this is actually not the easiest.
+- gonna try the llvm perf tools.
+
+all of the profilers on mac are a huge pain. gperftools seems best, benchmarks/profile.sh encapsulates the usage.
+
+dtrace seems possible, but also seems like it has issues; benchmarks/bench.sh for usage. It might be better if I was better at dtrace (same goes for gperftools too, I guess).
+
+tableGet still seems slow; I think opting into a small array when the size is small (4 items or less?) instead of the hash table might be worth it. Maybe there's a way of caching the values too? we call it a lot with the same args.
+
+2. Many strings in real-world user programs are small, often only a character or two. This is less of a concern in clox because we intern strings, but most VMs don’t. For those that don’t, heap allocating a tiny character array for each of those little strings and then representing the value as a pointer to that array is wasteful. Often, the pointer is larger than the string’s characters. A classic trick is to have a separate value representation for small strings that stores the characters inline in the value.
+
+Starting from clox’s original tagged union representation, implement that optimization. Write a couple of relevant benchmarks and see if it helps.
+
+3. Reflect back on your experience with this book. What parts of it worked well for you? What didn’t? Was it easier for you to learn bottom-up or top-down? Did the illustrations help or distract? Did the analogies clarify or confuse?
+
+The more you understand your personal learning style, the more effectively you can upload knowledge into your head. You can specifically target material that teaches you the way you learn best.
+
+- the humor was great
+- free and nicely rendered online matters so much
+- the illustrations were nice looking but, imo, not particularly key for my learning
+- the challenges and implementation are where the real learning seems to happen; but it's also hard to force myself to spend the time to do every challenge - they aren't all that interesting or compelling, I kinda wanted to 'get through it' -- even though that means things will stick less well in my mind. maybe a motivation thing?

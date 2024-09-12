@@ -27,7 +27,7 @@ var zoo = Zoo();
 var sum = 0;
 print "zoo test, start!";
 var start = clock();
-while (sum < 100000000) {
+while (sum < 200000000) {
   sum = sum + zoo.ant()
             + zoo.banana()
             + zoo.tuna()

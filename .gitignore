@@ -2,3 +2,8 @@ actual-ci
 **.class
 **.o
 **.out
+*.dSYM/*
+*.stacks
+*.folded
+*.svg
+benchmarks/profile_report.txt
