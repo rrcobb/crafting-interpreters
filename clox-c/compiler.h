@@ -5,6 +5,7 @@
 #include "vm.h"
 
 ObjFunction* compile(const char* source);
+void optimizeByteCode(ObjFunction* function);
 void markCompilerRoots();
 
 #endif

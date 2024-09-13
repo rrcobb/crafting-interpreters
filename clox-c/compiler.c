@@ -431,6 +431,7 @@ static void binary(bool canAssign) {
 
 
 static void call(bool canAssign) {
+  printf("call! function name: %.*s\n", parser.previous.length, parser.previous.start);
   uint8_t argCount = argumentList();
   emitBytes(OP_CALL, argCount);
 }
@@ -649,6 +650,37 @@ static void block() {
   consume(TOKEN_RIGHT_BRACE, "Expect '}' after block.");
 }
 
+static bool isInlinable(ObjFunction* function) {
+  Chunk* chunk = &function->chunk;
+  
+  // Don't inline functions with upvalues
+  if (function->upvalueCount > 0) return false;
+
+  // Don't inline functions that are too long
+  if (chunk->count > 10) return false;
+
+  // can't inline if we're facing potential inheritance issues
+  if (currentClass->hasSuperclass) return false;
+
+  for (int i = 0; i < chunk->count; i++) {
+    uint8_t instruction = chunk->code[i];
+    switch (instruction) {
+      case OP_SET_LOCAL:
+      case OP_SET_GLOBAL:
+      case OP_SET_UPVALUE:
+      case OP_SET_PROPERTY:
+      case OP_JUMP:
+      case OP_JUMP_IF_FALSE:
+      case OP_LOOP:
+      case OP_CLOSURE:
+        return false;  // Don't inline if it assigns, jumps, or closes
+    }
+  }
+
+  // Inline if it's short, has no assignments, and no jumps, creates no closures, and captures no upvalues
+  return true;
+}
+
 static void function(FunctionType type) {
   Compiler compiler;
   initCompiler(&compiler, type);
@@ -676,6 +708,8 @@ static void function(FunctionType type) {
     emitByte(compiler.upvalues[i].isLocal ? 1 : 0);
     emitByte(compiler.upvalues[i].index);
   }
+
+  function->isInlinable = isInlinable(function);
 }
 
 static void method() {
@@ -937,6 +971,36 @@ ObjFunction* compile(const char* source) {
   ObjFunction* function = endCompiler();
 
   return parser.hadError ? NULL : function;
+}
+
+void inlineFunction(ObjFunction* caller, int* instructionIndex, ObjClosure* callee) {
+  // 1. Remove the OP_CALL or OP_INVOKE instruction
+  // 2. Insert the bytecode of the inlined function
+  // 3. Adjust any jump offsets in the inlined code
+  // 4. Update the instruction index
+}
+
+void optimizeByteCode(ObjFunction* function) {
+  printf("Optimizing...\n");
+  for (int i = 0; i < function->chunk.count; i++) {
+    uint8_t instruction = function->chunk.code[i];
+    switch (instruction) {
+      case OP_CALL: {
+        // how do we know what function we're calling?
+        // 
+      }
+      case OP_INVOKE: {
+          break;
+          uint8_t constantIndex = function->chunk.code[i + 1];
+          ObjString* methodName = AS_STRING(function->chunk.constants.values[constantIndex]);
+          uint8_t argCount = function->chunk.code[i + 2];
+          printf("Found OP_INVOKE for method %s with %d args\n", methodName->chars, argCount);
+          break;
+      }
+      default:
+          break;
+    }
+  }
 }
 
 void markCompilerRoots() {

@@ -10,6 +10,8 @@ void initChunk(Chunk* chunk) {
   chunk->code = NULL;
   chunk->lines = NULL;
   initValueArray(&chunk->constants);
+  // add a sentinel value to the constant array
+  addConstant(chunk, NIL_VAL);
 }
 
 void writeChunk(Chunk* chunk, uint8_t byte, int line) {

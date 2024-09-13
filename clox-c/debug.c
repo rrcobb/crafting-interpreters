@@ -7,6 +7,16 @@
 void disassembleChunk(Chunk* chunk, const char* name) {
   printf("== %s ==\n", name);
 
+  printf("> Constants\n [");
+  for (int index = 0; index < chunk->constants.count; index++) {
+    printValue(chunk->constants.values[index]);
+    if (index < chunk->constants.count -1) {
+      printf(", ");
+    }
+  }
+  printf("]\n");
+
+  printf("> Instructions\n");
   for (int offset = 0; offset < chunk->count;) {
     offset = disassembleInstruction(chunk, offset);
   }

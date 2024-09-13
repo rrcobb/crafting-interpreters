@@ -581,15 +581,12 @@ static InterpretResult run() {
 #undef READ_CONSTANT
 #undef READ_STRING
 #undef BINARY_OP
-
-#ifdef DEBUG_TRACK_TABLE
-  printTableStats();
-#endif
 }
 
 InterpretResult interpret(const char* source) {
   ObjFunction* function = compile(source);
   if (function == NULL) return INTERPRET_COMPILE_ERROR;
+  optimizeByteCode(function);
   push(OBJ_VAL(function));
 
   ObjClosure* closure = newClosure(function);
